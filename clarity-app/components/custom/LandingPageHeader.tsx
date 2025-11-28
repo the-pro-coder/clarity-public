@@ -6,7 +6,7 @@ export default function LandingPageHeader() {
       <div className="flex items-center gap-4">
         <Image
           className="hover:cursor-pointer"
-          src="/Clarity Logos/Clarity Full Logo Light.png"
+          src="/app logos/full logo light.png"
           alt="Clarity Logo"
           width={180}
           height={40}
