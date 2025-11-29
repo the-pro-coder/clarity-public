@@ -3,6 +3,26 @@
 
 @custom-variant dark (&:is(.dark *));
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+img,
+button {
+  animation: appear 1s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

@@ -14,9 +14,9 @@ export default function LandingPageHeroSection({
       {!hamburgerMenuOpen ? (
         <section className="flex">
           <div className="flex-1 h-[91dvh] max-w-1/2 max-sm:max-w-full max-sm:items-center flex flex-col pt-10">
-            <h1 className="text-[clamp(35px,4.3vw,90px)] max-w-full text-nowrap flex flex-col pl-14 max-sm:pl-2">
+            <h1 className="text-[clamp(35px,4.3vw,90px)] w-[90%] max-w-full text-nowrap flex flex-col pl-14 max-sm:pl-2">
               <span>Learning that adapts</span>
-              <span className="text-[clamp(60px,7vw,150px)] lg:leading-20 lg:mb-4 font-bold max-sm:leading-10">
+              <span className="text-[clamp(60px,7vw,150px)] lg:leading-20 lg:mb-4 font-bold max-sm:leading-10 text-primary">
                 to your mind
               </span>
             </h1>
