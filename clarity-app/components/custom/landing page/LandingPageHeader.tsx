@@ -1,10 +1,14 @@
 "use client";
+import Link from "next/link";
 import { Button } from "../../ui/button";
 import Image from "next/image";
 import { Fragment, useState } from "react";
 import { MenuIcon } from "lucide-react";
 import { XIcon } from "lucide-react";
-import LandingPageHeroSection from "./LandingPageHeroSection";
+import { useTheme } from "next-themes";
+import LandingPageSectionJoint, {
+  HamburgerMenu,
+} from "./LandingPageSectionJoint";
 // Type for button that also contains a link
 export type LinkedButton = {
   text: string;
@@ -32,75 +36,82 @@ const ctaText = "CTA";
 
 export default function LandingPageHeader() {
   const [hamburgerMenuOpen, setHamburgerMenuOpen] = useState(false);
+  const { setTheme } = useTheme();
+  setTheme("system");
   return (
     <Fragment>
       {!hamburgerMenuOpen ? (
-        <header className="sticky bg-[#ffffffbb] dark:bg-[#000000cc] backdrop-blur-xs top-0 border-b w-full m-auto h-20 flex max-sm:px-3 gap-4 justify-between px-3 py-2">
-          <div className="flex items-center gap-4 flex-2">
-            <Image
-              className="hover:cursor-pointer"
-              src="/app logos/full logo light.png"
-              alt="Clarity Logo"
-              width={140}
-              height={40}
-            />
-            <div className="max-md:hidden">
-              {leftButtonList.map(({ text, _link }: LinkedButton, key) => (
+        <Fragment>
+          <header className="sticky bg-header backdrop-blur-xs top-0 border-b w-full m-auto h-20 flex max-sm:px-3 gap-4 justify-between px-3 py-2">
+            <div className="flex items-center gap-4 flex-2">
+              <Image
+                className="hover:cursor-pointer"
+                src="/app logos/full logo light.png"
+                alt="Clarity Logo"
+                width={140}
+                height={40}
+              />
+              <div className="max-md:hidden">
+                {leftButtonList.map(({ text, _link }: LinkedButton, key) => (
+                  <Button
+                    className="hover:cursor-pointer"
+                    variant={"ghost"}
+                    key={key}
+                  >
+                    <Link href={`/${_link}`} target="_blank">
+                      {text}
+                    </Link>
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center gap-3 max-sm:gap-2 flex-1 justify-end">
+              <Button
+                onClick={() => {
+                  setHamburgerMenuOpen((prev) => !prev);
+                }}
+                className="hover:cursor-pointer hidden max-md:block"
+              >
+                {<MenuIcon />}
+              </Button>
+
+              {rightButtonList.map(({ text, _link }: LinkedButton, key) => (
                 <Button
-                  className="hover:cursor-pointer"
-                  variant={"ghost"}
+                  className="hover:cursor-pointer max-sm:p-1.5"
+                  variant={"outline"}
                   key={key}
                 >
-                  <a href={_link} target="_blank">
+                  <Link href={`/${_link}`} target="_blank">
                     {text}
-                  </a>
+                  </Link>
                 </Button>
               ))}
-            </div>
-          </div>
-          <div className="flex items-center gap-3 flex-1 justify-end">
-            <Button
-              onClick={() => {
-                setHamburgerMenuOpen((prev) => !prev);
-              }}
-              className="hover:cursor-pointer hidden max-md:block"
-            >
-              {<MenuIcon />}
-            </Button>
-            {rightButtonList.map(({ text, _link }: LinkedButton, key) => (
-              <Button
-                className="hover:cursor-pointer"
-                variant={"outline"}
-                key={key}
-              >
-                <a href={_link} target="_blank">
-                  {text}
-                </a>
+              <Button className="hover:cursor-pointer max-sm:p-2.5">
+                {ctaText}
               </Button>
-            ))}
-            <Button className="hover:cursor-pointer">{ctaText}</Button>
-          </div>
-        </header>
+            </div>
+          </header>
+          <LandingPageSectionJoint />
+        </Fragment>
       ) : (
-        <header>
-          <div className="absolute right-3 top-2">
-            <Button
-              className="rounded-full w-10 h-10 cursor-pointer"
-              variant={"ghost"}
-              size={"icon-lg"}
-              onClick={() => {
-                setHamburgerMenuOpen(false);
-              }}
-            >
-              {<XIcon />}
-            </Button>
-          </div>
-        </header>
+        <Fragment>
+          <header>
+            <div className="absolute right-3 top-2">
+              <Button
+                className="rounded-full w-10 h-10 cursor-pointer"
+                variant={"ghost"}
+                size={"icon-lg"}
+                onClick={() => {
+                  setHamburgerMenuOpen(false);
+                }}
+              >
+                {<XIcon />}
+              </Button>
+            </div>
+          </header>
+          <HamburgerMenu hamburgerItems={leftButtonList} />
+        </Fragment>
       )}
-      <LandingPageHeroSection
-        hamburgerItems={leftButtonList}
-        hamburgerMenuOpen={hamburgerMenuOpen}
-      />
     </Fragment>
   );
 }
