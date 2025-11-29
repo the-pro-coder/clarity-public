@@ -35,7 +35,7 @@ export default function LandingPageHeader() {
   return (
     <Fragment>
       {!hamburgerMenuOpen ? (
-        <header className="border-b w-full m-auto h-20 flex max-sm:px-3 gap-4 justify-between px-3 py-2">
+        <header className="sticky bg-transparent backdrop-blur-xs top-0 border-b w-full m-auto h-20 flex max-sm:px-3 gap-4 justify-between px-3 py-2">
           <div className="flex items-center gap-4 flex-2">
             <Image
               className="hover:cursor-pointer"

@@ -4,6 +4,15 @@ export default function Home() {
   return (
     <Fragment>
       <LandingPageHeader />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
     </Fragment>
   );
 }
