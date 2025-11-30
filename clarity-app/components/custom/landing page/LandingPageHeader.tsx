@@ -21,7 +21,6 @@ const leftButtonList: LinkedButton[] = [
   { text: "Element 2", _link: "" },
   { text: "Element 3", _link: "" },
   { text: "Element 4", _link: "" },
-  { text: "Element 5", _link: "" },
 ];
 
 // Define a list of LinkedButtons (the right side buttons) to map them into shadcn Button elements
@@ -65,7 +64,7 @@ export default function LandingPageHeader() {
                 ))}
               </div>
             </div>
-            <div className="flex items-center gap-3 max-sm:gap-2 flex-1 justify-end">
+            <div className="flex items-center gap-2 max-sm:gap-2 flex-1 justify-end">
               <Button
                 onClick={() => {
                   setHamburgerMenuOpen((prev) => !prev);

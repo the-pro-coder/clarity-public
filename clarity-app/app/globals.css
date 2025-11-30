@@ -57,15 +57,15 @@ section {
 
 :root {
   --radius: 0.625rem;
-  --background: #f7f7f5;
+  --background: #ebebeb;
   --foreground: #1c1c1c;
-  --header: #f7f7f5cc;
+  --header: #ebebebcc;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.141 0.005 285.823);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.141 0.005 285.823);
   --primary: #598bff;
-  --primary-foreground: oklch(95.815% 0.00011 271.152);
+  --primary-foreground: oklch(92.797% 0.00011 271.152);
   --secondary: #1c1c1c;
   --secondary-foreground: oklch(0.21 0.006 285.885);
   --muted: oklch(0.967 0.001 286.375);
@@ -92,15 +92,15 @@ section {
 }
 
 .dark {
-  --background: #101010;
+  --background: #1a1a1a;
   --foreground: #e3e3e3;
-  --header: #101010cc;
+  --header: #1a1a1acc;
   --card: oklch(0.21 0.006 285.885);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.21 0.006 285.885);
   --popover-foreground: oklch(0.985 0 0);
   --primary: #7da6ff;
-  --primary-foreground: #1a1a1a;
+  --primary-foreground: rgb(34, 34, 34);
   --secondary: #bebebe;
   --secondary-foreground: oklch(0.274 0.006 286.033);
   --muted: oklch(0.274 0.006 286.033);
