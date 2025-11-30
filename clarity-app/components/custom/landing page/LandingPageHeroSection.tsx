@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Button } from "../../ui/button";
+import Link from "next/link";
 export default function LandingPageHeroSection() {
   return (
     <section className="flex">
@@ -29,16 +30,14 @@ export default function LandingPageHeroSection() {
           </span>
         </p>
         <div className="w-[90%] pl-14 max-sm:pl-2 mt-10 flex gap-4 pb-10">
-          <Button
-            className="text-lg cursor-pointer"
-            size={"lg"}
-            variant={"outline"}
-          >
+          <Button className="text-lg" size={"lg"} variant={"outline"}>
             Info Button
           </Button>
-          <Button className="text-lg cursor-pointer" size={"lg"}>
-            Get Started
-          </Button>
+          <Link href="/auth" target="_blank">
+            <Button className="text-lg" size={"lg"}>
+              Get Started
+            </Button>
+          </Link>
         </div>
       </div>
       <div className="flex-1 max-sm:hidden flex justify-center items-center min-w-1/2">

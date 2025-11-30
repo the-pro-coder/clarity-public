@@ -5,7 +5,6 @@ import Image from "next/image";
 import { Fragment, useState } from "react";
 import { MenuIcon } from "lucide-react";
 import { XIcon } from "lucide-react";
-import { useTheme } from "next-themes";
 import LandingPageSectionJoint, {
   HamburgerMenu,
 } from "./LandingPageSectionJoint";
@@ -31,12 +30,10 @@ const rightButtonList: LinkedButton[] = [
 ];
 
 // Define a CTA message to be included in the CTA button
-const ctaText = "CTA";
+const ctaText = "Get Started";
 
 export default function LandingPageHeader() {
   const [hamburgerMenuOpen, setHamburgerMenuOpen] = useState(false);
-  const { setTheme } = useTheme();
-  setTheme("system");
   return (
     <Fragment>
       {!hamburgerMenuOpen ? (
@@ -44,7 +41,7 @@ export default function LandingPageHeader() {
           <header className="sticky bg-header backdrop-blur-xs top-0 border-b w-full m-auto h-20 flex max-sm:px-3 gap-4 justify-between px-3 py-2">
             <div className="flex items-center gap-4 flex-2">
               <Image
-                className="hover:cursor-pointer"
+                className=""
                 src="/app logos/full logo light.png"
                 alt="Clarity Logo"
                 width={140}
@@ -52,15 +49,11 @@ export default function LandingPageHeader() {
               />
               <div className="max-md:hidden">
                 {leftButtonList.map(({ text, _link }: LinkedButton, key) => (
-                  <Button
-                    className="hover:cursor-pointer"
-                    variant={"ghost"}
-                    key={key}
-                  >
-                    <Link href={`/${_link}`} target="_blank">
+                  <Link key={key} href={`/${_link}`} target="_blank">
+                    <Button className="" variant={"ghost"}>
                       {text}
-                    </Link>
-                  </Button>
+                    </Button>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -69,25 +62,19 @@ export default function LandingPageHeader() {
                 onClick={() => {
                   setHamburgerMenuOpen((prev) => !prev);
                 }}
-                className="hover:cursor-pointer hidden max-md:block"
+                className=" hidden max-md:block"
               >
                 {<MenuIcon />}
               </Button>
 
               {rightButtonList.map(({ text, _link }: LinkedButton, key) => (
-                <Button
-                  className="hover:cursor-pointer max-sm:p-1.5"
-                  variant={"outline"}
-                  key={key}
-                >
-                  <Link href={`/${_link}`} target="_blank">
+                <Link key={key} href={`/${_link}`} target="_blank">
+                  <Button className=" max-sm:p-1.5" variant={"outline"}>
                     {text}
-                  </Link>
-                </Button>
+                  </Button>
+                </Link>
               ))}
-              <Button className="hover:cursor-pointer max-sm:p-2.5">
-                {ctaText}
-              </Button>
+              <Button className=" max-sm:p-2.5">{ctaText}</Button>
             </div>
           </header>
           <LandingPageSectionJoint />
@@ -97,7 +84,7 @@ export default function LandingPageHeader() {
           <header>
             <div className="absolute right-3 top-2">
               <Button
-                className="rounded-full w-10 h-10 cursor-pointer"
+                className="rounded-full w-10 h-10"
                 variant={"ghost"}
                 size={"icon-lg"}
                 onClick={() => {
