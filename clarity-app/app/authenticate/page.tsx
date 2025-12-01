@@ -1,7 +1,22 @@
 import AuthCard from "@/components/custom/auth/AuthCard";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
-export default function AuthenticationPage() {
+
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
+
+async function CheckIfLoggedIn() {
+  const supabase = await createClient();
+  const session = await supabase.auth.getSession();
+  if (session != null) {
+    const user = (await supabase.auth.getUser()).data;
+    console.log(user.user);
+    if (user.user != null) redirect("/dashboard");
+  }
+}
+
+export default async function AuthenticationPage() {
+  await CheckIfLoggedIn();
   return (
     <main className="flex flex-col m-auto justify-center gap-4">
       <section className="flex flex-col items-center pt-4 gap-2">

@@ -1,6 +1,5 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import { Dispatch, FormEvent, SetStateAction, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
@@ -18,7 +17,7 @@ export default function AuthCard() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const supabase = createSupabaseBrowserClient();
+  const [supabase] = useState(() => createSupabaseBrowserClient());
 
   const logInSelected = activeButton == "Log In";
   const passwordAnnotations = {
@@ -40,17 +39,30 @@ export default function AuthCard() {
       if (error) setErrorMsg(error.message);
       else router.push("/dashboard");
     } else {
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const origin =
+        typeof window === "undefined" ? "" : window.location.origin;
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${origin}/authenticate/callback`,
+        },
+      });
       setLoading(false);
       if (error) setErrorMsg(error.message);
-      else router.push("/authenticate/confirm-email");
+      else {
+        const user = await supabase.auth.getUser();
+        await supabase.from("Users").insert({ user_id: user });
+        router.push("/authenticate/confirm-email");
+      }
     }
   }
   return (
     <div className="w-4/5 flex flex-col gap-3">
       {loading && (
         <div className="w-dvw h-dvh absolute top-0 left-0 flex justify-center items-center">
-          <div className="w-full h-full border bg-white opacity-50 absolute top-0 left-0"></div>
+          <div className="w-dvw h-dvh border bg-white opacity-50 absolute top-0 left-0"></div>
           <div className="z-100 absolute w-full h-full flex justify-center items-center">
             <InfinitySpin height={200} width={200} color="#598bff" />
           </div>
