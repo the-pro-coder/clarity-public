@@ -33,7 +33,7 @@ export default function LandingPageHeroSection() {
           <Button className="text-lg" size={"lg"} variant={"outline"}>
             Info Button
           </Button>
-          <Link href="/auth" target="_blank">
+          <Link href="/authenticate" target="_blank">
             <Button className="text-lg" size={"lg"}>
               Get Started
             </Button>

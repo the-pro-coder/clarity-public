@@ -25,7 +25,7 @@ const leftButtonList: LinkedButton[] = [
 // Define a list of LinkedButtons (the right side buttons) to map them into shadcn Button elements
 
 const rightButtonList: LinkedButton[] = [
-  { text: "Button 1", _link: "https://google.com" },
+  { text: "Button 1", _link: "" },
   { text: "Button 2", _link: "" },
 ];
 
@@ -74,7 +74,9 @@ export default function LandingPageHeader() {
                   </Button>
                 </Link>
               ))}
-              <Button className=" max-sm:p-2.5">{ctaText}</Button>
+              <Link href="/authenticate" target="_blank">
+                <Button className=" max-sm:p-2.5">{ctaText}</Button>
+              </Link>
             </div>
           </header>
           <LandingPageSectionJoint />
