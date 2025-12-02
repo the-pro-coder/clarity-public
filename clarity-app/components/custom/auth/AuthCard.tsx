@@ -1,13 +1,12 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Dispatch, FormEvent, SetStateAction, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@radix-ui/react-label";
-import Link from "next/link";
+import { FormEvent, useState } from "react";
+import InputField from "../prefabs/InputField";
 import AuthServiceIcon from "./AuthServiceIcon";
 import { useRouter } from "next/navigation";
 import { InfinitySpin } from "react-loader-spinner";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
+import { toast } from "sonner";
 
 export default function AuthCard() {
   const router = useRouter();
@@ -23,7 +22,7 @@ export default function AuthCard() {
   const passwordAnnotations = {
     text: logInSelected ? "Forgot Password?" : "At least 8 characters",
     type: logInSelected ? "button" : "text",
-    href: "/",
+    href: "/authenticate/reset-password",
   };
   const CTA = logInSelected ? "Log In" : "Create Account";
 
@@ -36,8 +35,35 @@ export default function AuthCard() {
         password,
       });
       setLoading(false);
-      if (error) setErrorMsg(error.message);
-      else router.push("/dashboard");
+      if (error) {
+        if (error.message.toLowerCase() == "email not confirmed") {
+          return toast.error("Email not confirmed", {
+            description: "Please confirm your email",
+            action: {
+              label: "Resend Link",
+              onClick: async () => {
+                const origin =
+                  typeof window === "undefined" ? "" : window.location.origin;
+                const { data, error } = await supabase.auth.resend({
+                  email,
+                  type: "signup",
+                  options: {
+                    emailRedirectTo: `${origin}/authenticate/callback`,
+                  },
+                });
+                if (error) {
+                  return toast.error("An error ocurred", {
+                    description: "Please try again later",
+                  });
+                }
+                return toast.success("Confirmation link resent");
+              },
+            },
+          });
+        } else {
+          return toast.error(error.message);
+        }
+      } else router.push("/dashboard");
     } else {
       const origin =
         typeof window === "undefined" ? "" : window.location.origin;
@@ -127,63 +153,6 @@ export default function AuthCard() {
         <AuthServiceIcon service="Google" />
         <AuthServiceIcon service="Microsoft" />
         <AuthServiceIcon service="Discord" />
-      </div>
-    </div>
-  );
-}
-
-function InputField({
-  label,
-  placeholder,
-  type,
-  required,
-  annotations,
-  binding,
-}: {
-  label: string;
-  placeholder: string;
-  type: string;
-  required?: boolean | undefined;
-  annotations?: {
-    text: string;
-    type: string;
-    href: string;
-  };
-  binding: Dispatch<SetStateAction<string>>;
-}) {
-  label = label[0].toUpperCase() + label.substring(1);
-
-  const Annotations: React.ReactNode =
-    annotations?.type == "text" ? (
-      <p className={`text-secondary text-sm`}>{annotations?.text}</p>
-    ) : (
-      <Link href={annotations?.href || ""}>
-        <p className={`text-secondary text-sm`}>{annotations?.text}</p>
-      </Link>
-    );
-  return (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor={label} className="font-semibold">
-        {label}
-        {required ? <span className="text-destructive"> *</span> : ""}
-      </Label>
-      <Input
-        required={required}
-        type={type}
-        name={label}
-        id={label}
-        className="bg-accent"
-        onChange={(e) => {
-          binding(e.target.value);
-        }}
-        placeholder={placeholder}
-      />
-      <div
-        className={`flex w-full ${
-          annotations?.type == "button" ? "justify-end" : ""
-        }`}
-      >
-        {annotations != null && Annotations}
       </div>
     </div>
   );

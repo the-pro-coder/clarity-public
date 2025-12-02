@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -22,6 +23,7 @@ export default function RootLayout({
     <html lang="en">
       <ThemeProvider attribute={"class"} defaultTheme="system" enableSystem>
         <body className={`${inter.className} antialiased`}>{children}</body>
+        <Toaster />
       </ThemeProvider>
     </html>
   );
