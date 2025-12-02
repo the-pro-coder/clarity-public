@@ -22,13 +22,12 @@ export default function AuthCallbackPage() {
 
       const encoded = encodeURIComponent(msg);
 
-      router.replace(`/authenticate/error?message=${encoded}`);
+      router.replace(`/authenticate/callback/error?message=${encoded}`);
       return;
     }
 
     // CASE 2: Valid confirmation → verify session exists → go to dashboard
     supabase.auth.getSession().then(({ data }) => {
-      console.log("Callback session:", data.session);
       router.replace("/dashboard");
     });
   }, [error, errorDescription, supabase, router]);

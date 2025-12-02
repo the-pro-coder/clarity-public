@@ -3,17 +3,45 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
+import { ResendParams } from "@supabase/supabase-js";
+import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
 export default function ConfirmEmailPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
   async function CheckConfirmation() {
     const supabase = createSupabaseBrowserClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-
+    console.log(user);
     // user may be null if not logged in
     const isConfirmed = !!user?.email_confirmed_at;
     if (isConfirmed) router.push("/dashboard");
+    else {
+      return toast.error("Please confirm your email", {
+        description: "Check your inbox for a confirmation link.",
+      });
+    }
+  }
+  async function ResendEmailConfirmation() {
+    const origin = typeof window === "undefined" ? "" : window.location.origin;
+    const supabase = createSupabaseBrowserClient();
+    if (!email) {
+      return toast.error("An error ocurred, please ensure your email is valid");
+    }
+    const credentials: ResendParams = {
+      type: "signup",
+      options: { emailRedirectTo: `${origin}/authenticate/callback` },
+      email,
+    };
+    const { data, error } = await supabase.auth.resend(credentials);
+    if (error) {
+      return toast.error("An error ocurred, please try again later");
+    } else {
+      return toast.success("Confirmation link resent");
+    }
   }
   return (
     <main className="w-[85%] m-auto py-10 max-h-full h-full flex justify-around">
@@ -29,12 +57,27 @@ export default function ConfirmEmailPage() {
           Verify Your Email
         </h2>
         <p className="text-2xl w-13/20 max-sm:text-lg max-sm:w-4/5">
-          A confirmation link has been sent to your email. Ciick on the link,
-          and then click on the button below to verify your email. If you
-          didn&apos;t receive an email,{" "}
+          A confirmation link has been sent to{" "}
+          {email != ""
+            ? email?.substring(0, 3) +
+              "......" +
+              email
+                ?.split("@")[0]
+                .substring(
+                  email?.split("@")[0].length - 2,
+                  email?.split("@")[0].length
+                ) +
+              "@" +
+              email?.split("@")[1]
+            : "your email"}
+          . Click on the link, and then click on the button below to verify your
+          email. If you didn&apos;t receive an email,{" "}
           {
             <Button
               variant={"link"}
+              onClick={async () => {
+                await ResendEmailConfirmation();
+              }}
               className="cursor-pointer text-primary p-0 text-2xl max-sm:text-lg"
             >
               click here.

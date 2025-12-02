@@ -51,11 +51,9 @@ export default function AuthCard() {
       });
       setLoading(false);
       if (error) setErrorMsg(error.message);
-      else {
-        const user = await supabase.auth.getUser();
-        await supabase.from("Users").insert({ user_id: user });
-        router.push("/authenticate/confirm-email");
-      }
+      router.push(
+        `/authenticate/confirm-email?email=${encodeURIComponent(email)}`
+      );
     }
   }
   return (
