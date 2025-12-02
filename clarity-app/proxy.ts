@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getUser, updateSession } from "./utils/supabase/middleware";
 
-export async function middleware(request: NextRequest, response: NextResponse) {
+export async function proxy(request: NextRequest, response: NextResponse) {
   const protectedRoutes = ["/dashboard"];
   const path = new URL(request.url).pathname;
   const {

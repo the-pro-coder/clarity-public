@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 
 const inter = Inter({
@@ -8,7 +7,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Clarity - Confirm your email",
+  title: "Clarity - Reset Password",
   description:
     "Personalized learning for high-school students with ADHD. Clarity adapts explanations in real time using AI to improve understanding. Designed for focus, clarity, and engagement.",
 };

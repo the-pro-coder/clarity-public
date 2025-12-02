@@ -14,7 +14,6 @@ export default function AuthCard() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
 
   const [supabase] = useState(() => createSupabaseBrowserClient());
 
@@ -39,6 +38,7 @@ export default function AuthCard() {
         if (error.message.toLowerCase() == "email not confirmed") {
           return toast.error("Email not confirmed", {
             description: "Please confirm your email",
+            position: "top-center",
             action: {
               label: "Resend Link",
               onClick: async () => {
@@ -54,20 +54,22 @@ export default function AuthCard() {
                 if (error) {
                   return toast.error("An error ocurred", {
                     description: "Please try again later",
+                    position: "top-center",
                   });
                 }
-                return toast.success("Confirmation link resent");
+                return toast.success("Confirmation link resent", {
+                  position: "top-center",
+                });
               },
             },
           });
         } else {
-          return toast.error(error.message);
+          return toast.error(error.message, { position: "top-center" });
         }
       } else router.push("/dashboard");
     } else {
       const origin =
         typeof window === "undefined" ? "" : window.location.origin;
-
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -76,7 +78,20 @@ export default function AuthCard() {
         },
       });
       setLoading(false);
-      if (error) setErrorMsg(error.message);
+      if (error) {
+        let msg = { title: "An error occurred", description: error.message };
+        if (error.code == "weak_password") {
+          msg = {
+            title: "Your password is not strong enough",
+            description:
+              "It should be at least 8 characters long, contain a number, an uppercase character, and a special symbol",
+          };
+        }
+        return toast.error(msg.title, {
+          description: msg.description,
+          position: "top-center",
+        });
+      }
       router.push(
         `/authenticate/confirm-email?email=${encodeURIComponent(email)}`
       );
@@ -86,13 +101,12 @@ export default function AuthCard() {
     <div className="w-4/5 flex flex-col gap-3">
       {loading && (
         <div className="w-dvw h-dvh absolute top-0 left-0 flex justify-center items-center">
-          <div className="w-dvw h-dvh border bg-white opacity-50 absolute top-0 left-0"></div>
+          {/* <div className="w-dvw h-dvh border bg-white opacity-50 absolute top-0 left-0"></div> */}
           <div className="z-100 absolute w-full h-full flex justify-center items-center">
             <InfinitySpin height={200} width={200} color="#598bff" />
           </div>
         </div>
       )}
-      <span className="text-destructive text-center font-bold">{errorMsg}</span>
       <div className="bg-accent p-1.5 rounded-md flex">
         <Button
           variant={"ghost"}
@@ -138,7 +152,6 @@ export default function AuthCard() {
           binding={setPassword}
         />
         <Button
-          formAction={logInSelected ? () => {} : () => {}}
           type="submit"
           disabled={loading}
           className="text-white py-5 dark:text-accent font-bold text-md w-full self-center"

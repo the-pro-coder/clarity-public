@@ -22,6 +22,7 @@ export default function ConfirmEmailPage() {
     else {
       return toast.error("Please confirm your email", {
         description: "Check your inbox for a confirmation link.",
+        position: "top-center",
       });
     }
   }
@@ -29,7 +30,10 @@ export default function ConfirmEmailPage() {
     const origin = typeof window === "undefined" ? "" : window.location.origin;
     const supabase = createSupabaseBrowserClient();
     if (!email) {
-      return toast.error("An error ocurred, please ensure your email is valid");
+      return toast.error(
+        "An error ocurred, please ensure your email is valid",
+        { position: "top-center" }
+      );
     }
     const credentials: ResendParams = {
       type: "signup",
@@ -38,9 +42,13 @@ export default function ConfirmEmailPage() {
     };
     const { data, error } = await supabase.auth.resend(credentials);
     if (error) {
-      return toast.error("An error ocurred, please try again later");
+      return toast.error("An error ocurred, please try again later", {
+        position: "top-center",
+      });
     } else {
-      return toast.success("Confirmation link resent");
+      return toast.success("Confirmation link resent", {
+        position: "top-center",
+      });
     }
   }
   return (
