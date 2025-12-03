@@ -60,15 +60,15 @@ button {
 
 :root {
   --radius: 0.625rem;
-  --background: #ebebeb;
+  --background: #f7f7f7;
   --foreground: #1c1c1c;
-  --header: #ebebebcc;
+  --header: #f7f7f7cc;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.141 0.005 285.823);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.141 0.005 285.823);
   --primary: #598bff;
-  --primary-foreground: oklch(92.797% 0.00011 271.152);
+  --primary-foreground: #e8e9ee;
   --secondary: rgb(78, 78, 78);
   --secondary-foreground: oklch(0.21 0.006 285.885);
   --muted: oklch(0.967 0.001 286.375);

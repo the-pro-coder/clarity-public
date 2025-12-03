@@ -4,9 +4,10 @@ import { FormEvent, useState } from "react";
 import InputField from "../prefabs/InputField";
 import AuthServiceIcon from "./AuthServiceIcon";
 import { useRouter } from "next/navigation";
-import { InfinitySpin } from "react-loader-spinner";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
+import emailAlreadyRegistered from "@/app/authenticate/server";
+import LoadingScreenTemplate from "../util/LoadingScreenTemplate";
 
 export default function AuthCard() {
   const router = useRouter();
@@ -70,6 +71,15 @@ export default function AuthCard() {
     } else {
       const origin =
         typeof window === "undefined" ? "" : window.location.origin;
+      const isEmailRegistered = await emailAlreadyRegistered(email);
+      if (isEmailRegistered) {
+        setLoading(false);
+        return toast.error("Email is already registered", {
+          description:
+            "Please try using another email or log in with an existing account",
+          position: "top-center",
+        });
+      }
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -77,6 +87,7 @@ export default function AuthCard() {
           emailRedirectTo: `${origin}/authenticate/callback`,
         },
       });
+      console.log(error);
       setLoading(false);
       if (error) {
         let msg = { title: "An error occurred", description: error.message };
@@ -91,22 +102,16 @@ export default function AuthCard() {
           description: msg.description,
           position: "top-center",
         });
+      } else {
+        router.push(
+          `/authenticate/confirm-email?email=${encodeURIComponent(email)}`
+        );
       }
-      router.push(
-        `/authenticate/confirm-email?email=${encodeURIComponent(email)}`
-      );
     }
   }
   return (
     <div className="w-4/5 flex flex-col gap-3">
-      {loading && (
-        <div className="w-dvw h-dvh absolute top-0 left-0 flex justify-center items-center">
-          {/* <div className="w-dvw h-dvh border bg-white opacity-50 absolute top-0 left-0"></div> */}
-          <div className="z-100 absolute w-full h-full flex justify-center items-center">
-            <InfinitySpin height={200} width={200} color="#598bff" />
-          </div>
-        </div>
-      )}
+      {loading && <LoadingScreenTemplate />}
       <div className="bg-accent p-1.5 rounded-md flex">
         <Button
           variant={"ghost"}

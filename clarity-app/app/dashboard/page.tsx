@@ -31,7 +31,7 @@ async function GetUser() {
   if (!alreadyInserted) {
     const { data, error } = await supabase
       .from("Users")
-      .insert({ user_id: user?.id });
+      .insert({ user_id: user?.id, email: user?.email });
     if (!error) return data;
   }
 }
