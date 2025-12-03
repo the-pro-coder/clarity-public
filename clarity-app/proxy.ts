@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getUser, updateSession } from "./utils/supabase/middleware";
 
 export async function proxy(request: NextRequest, response: NextResponse) {
-  const protectedRoutes = ["/dashboard"];
+  const protectedRoutes = ["/dashboard", "/dashboard/get-started"];
   const path = new URL(request.url).pathname;
   const {
     data: { user },
