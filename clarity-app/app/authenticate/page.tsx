@@ -5,6 +5,8 @@ import ServicesHeaderTemplate from "@/components/custom/util/ServicesHeaderTempl
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
+type ExternalProviders = "Google" | "Microsoft" | "Discord";
+
 async function CheckIfLoggedIn() {
   const supabase = await createClient();
   const session = await supabase.auth.getSession();

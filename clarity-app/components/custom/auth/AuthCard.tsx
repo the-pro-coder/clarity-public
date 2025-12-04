@@ -109,6 +109,7 @@ export default function AuthCard() {
       }
     }
   }
+
   return (
     <div className="w-4/5 flex flex-col gap-3">
       {loading && <LoadingScreenTemplate />}
@@ -168,9 +169,21 @@ export default function AuthCard() {
         Or sign {logInSelected ? "in" : "up"} with:
       </p>
       <div className="flex justify-center gap-2 h-15 items-center">
-        <AuthServiceIcon service="Google" />
-        <AuthServiceIcon service="Microsoft" />
-        <AuthServiceIcon service="Discord" />
+        <AuthServiceIcon
+          service="google"
+          loginSelected={logInSelected}
+          router={router}
+        />
+        <AuthServiceIcon
+          service="azure"
+          loginSelected={logInSelected}
+          router={router}
+        />
+        <AuthServiceIcon
+          service="discord"
+          loginSelected={logInSelected}
+          router={router}
+        />
       </div>
     </div>
   );
