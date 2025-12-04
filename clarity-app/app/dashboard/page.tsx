@@ -60,11 +60,16 @@ async function GetUser() {
     const { data, error } = await supabase
       .from("Users")
       .insert({ user_id: user?.id, email: user?.email });
-    if (!error) return data;
+    if (!error) {
+      if (!alreadyInsertedProfile) {
+        redirect("/dashboard/get-started");
+      }
+    }
   }
   if (!alreadyInsertedProfile) {
     redirect("/dashboard/get-started");
   }
+  console.log(alreadyInsertedProfile + " bool identifier");
 
   if (alreadyInsertedUser) {
     const { data, error } = await supabase
