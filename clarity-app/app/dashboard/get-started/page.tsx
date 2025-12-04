@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
 import { Fragment, useState } from "react";
+import { useRouter } from "next/navigation";
 import InputField from "@/components/custom/prefabs/InputField";
 import { ArrowBigLeft, ArrowBigRight, BookOpenIcon } from "lucide-react";
 import {
@@ -15,11 +16,14 @@ import {
   SelectLabel,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 
 const interestAreasDB = ["math", "english"];
 const numberDB = ["one", "two", "three", "four"];
 
 export default function GetStartedPage() {
+  const router = useRouter();
+
   const totalPages = 3;
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -279,6 +283,38 @@ export default function GetStartedPage() {
     },
   ];
 
+  function pushData() {
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth
+      .getUser()
+      .then((data) => {
+        return data.data.user;
+      })
+      .then((user) => {
+        console.log(user);
+        supabase
+          .from("Profiles")
+          .insert({
+            user_id: user?.id,
+            name,
+            last_name: lastName,
+            public_username: username,
+            dedication_time: dedicationTime,
+            interest_areas: interestAreas,
+            confidence_status: confidenceStatus,
+          })
+          .then(() => {
+            router.replace("/dashboard");
+          });
+      })
+      .catch(() => {
+        return toast.error("An error ocurred while creating your profile", {
+          description: "Please try again",
+          position: "top-center",
+        });
+      });
+  }
+
   return (
     <main className="w-full h-[90dvh]">
       <Progress value={(currentPage / 3) * 100} />
@@ -339,9 +375,7 @@ export default function GetStartedPage() {
                   }
                   console.log(confidenceStatus);
                   if (canContinue) {
-                    return toast.success("Successful", {
-                      position: "top-center",
-                    });
+                    pushData();
                   } else {
                     return toast.error(
                       "Please fill out all the required fields",
