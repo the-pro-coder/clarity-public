@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
+import { Profile } from "@/utils/supabase/tableTypes";
 
 const interestAreasDB = ["math", "english"];
 const numberDB = ["one", "two", "three", "four"];
@@ -292,17 +293,19 @@ export default function GetStartedPage() {
       })
       .then((user) => {
         console.log(user);
+        const dataToInsert: Profile = {
+          user_id: user?.id || "",
+          name,
+          last_name: lastName,
+          public_username: username,
+          grade_level: grade || "",
+          dedication_time: dedicationTime || "",
+          interest_areas: interestAreas,
+          confidence_status: confidenceStatus,
+        };
         supabase
           .from("Profiles")
-          .insert({
-            user_id: user?.id,
-            name,
-            last_name: lastName,
-            public_username: username,
-            dedication_time: dedicationTime,
-            interest_areas: interestAreas,
-            confidence_status: confidenceStatus,
-          })
+          .insert(dataToInsert)
           .then(() => {
             router.replace("/dashboard");
           });

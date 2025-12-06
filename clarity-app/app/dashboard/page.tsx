@@ -1,85 +1,25 @@
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
-async function userRowExists() {
-  const supabase = await createClient();
+import DashboardHeader from "@/components/custom/dashboard/DashboardHeader";
+import { Setup, GetRowFromTable } from "./action";
+import { Profile, Preferences, User } from "@/utils/supabase/tableTypes";
 
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError) throw userError;
-  if (!user) return false; // no session
-
-  const { data, error } = await supabase
-    .from("Users")
-    .select("user_id")
-    .eq("user_id", user.id)
-    .maybeSingle(); // returns one row or null
-
-  if (error && error.code !== "PGRST116") {
-    // ignore "no rows" error if using older libs
-    throw error;
-  }
-
-  // if data is not null → row exists
-  return !!data;
-}
-
-async function profileRowExists() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError) throw userError;
-  if (!user) return false; // no session
-
-  const { data, error } = await supabase
-    .from("Profiles")
-    .select("user_id")
-    .eq("user_id", user.id)
-    .maybeSingle(); // returns one row or null
-
-  if (error && error.code !== "PGRST116") {
-    // ignore "no rows" error if using older libs
-    throw error;
-  }
-
-  // if data is not null → row exists
-  return !!data;
-}
-async function GetUser() {
-  const supabase = await createClient();
-  const user = (await supabase.auth.getUser()).data.user;
-  const alreadyInsertedUser = await userRowExists();
-  const alreadyInsertedProfile = await profileRowExists();
-  if (!alreadyInsertedUser) {
-    const { data, error } = await supabase
-      .from("Users")
-      .insert({ user_id: user?.id, email: user?.email });
-    if (!error) {
-      if (!alreadyInsertedProfile) {
-        redirect("/dashboard/get-started");
-      }
-    }
-  }
-  if (!alreadyInsertedProfile) {
-    redirect("/dashboard/get-started");
-  }
-  console.log(alreadyInsertedProfile + " bool identifier");
-
-  if (alreadyInsertedUser) {
-    const { data, error } = await supabase
-      .from("Users")
-      .select("*")
-      .eq("user_id", user?.id);
-    if (!error) return data;
-  }
-}
 export default async function Dashboard() {
-  const user = await GetUser();
-  return <h1>Welcome!</h1>;
+  // const [profile, progress, recommendations, settings] = await Promise.all([GetProfile(), GetUser(), GetProgress(), GetRecommendations(), GetSettings()])
+  const user = await Setup();
+  let profile: Profile, preferences: Preferences;
+  if (user != null) {
+    profile = await GetRowFromTable(`${user.user_id}`, "profiles");
+    preferences = await GetRowFromTable(`${user.user_id}`, "preferences");
+    return (
+      <main>
+        <section>
+          <DashboardHeader name={profile.name} last_name={profile.last_name} />
+        </section>
+        <h1>Welcome {profile?.name || ""}</h1>
+        <h2>Preferences: {preferences.updated_at}</h2>
+      </main>
+    );
+  } else {
+    // return loading skeleton;
+    return <h1>Loading</h1>;
+  }
 }
