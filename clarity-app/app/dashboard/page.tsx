@@ -1,6 +1,12 @@
 import DashboardHeader from "@/components/custom/dashboard/DashboardHeader";
 import { Setup, GetRowFromTable } from "./action";
 import { Profile, Preferences, User } from "@/utils/supabase/tableTypes";
+import { Flame } from "lucide-react";
+
+// to change later
+const streak = 3;
+
+const isLessonActive = false;
 
 export default async function Dashboard() {
   // const [profile, progress, recommendations, settings] = await Promise.all([GetProfile(), GetUser(), GetProgress(), GetRecommendations(), GetSettings()])
@@ -10,12 +16,25 @@ export default async function Dashboard() {
     profile = await GetRowFromTable(`${user.user_id}`, "profiles");
     preferences = await GetRowFromTable(`${user.user_id}`, "preferences");
     return (
-      <main>
+      <main className="flex flex-col gap-10">
         <section>
           <DashboardHeader name={profile.name} last_name={profile.last_name} />
         </section>
-        <h1>Welcome {profile?.name || ""}</h1>
-        <h2>Preferences: {preferences.updated_at}</h2>
+        <section className="max-w-4/5 w-4/5 m-auto flex flex-col gap-6">
+          <h2 className="text-6xl flex items-center gap-5">
+            Hi, {profile?.name ? profile.name + "!" : ""}
+            {streak >= 3 && (
+              <span className="flex items-center outline-4 rounded-full px-4 py-1 justify-center">
+                <Flame size={50} fill="orange" className="text-destructive" />
+                <span className="text-5xl font-bold">{streak}</span>
+              </span>
+            )}
+          </h2>
+          <p className="text-2xl">Ready to continue your learning flow?</p>
+          <h2 className="text-6xl font-bold">
+            {isLessonActive ? "Continue Learning" : "Your Next Step"}
+          </h2>
+        </section>
       </main>
     );
   } else {
