@@ -1,4 +1,5 @@
 "use server";
+import capitalize from "@/components/custom/util/Capitalize";
 import { createClient } from "@/utils/supabase/server";
 import { User, Preferences, Profile } from "@/utils/supabase/tableTypes";
 import { redirect } from "next/navigation";
@@ -10,7 +11,7 @@ async function alreadyInsertedRow(
   user_id: string
 ): Promise<boolean> {
   const { data, error } = await supabase
-    .from(`${table[0].toUpperCase() + table.substring(1)}`)
+    .from(`${capitalize(table)}`)
     .select("user_id")
     .eq("user_id", user_id)
     .maybeSingle(); // returns one row or null
@@ -31,7 +32,7 @@ async function InsertRow(
   const inserted = await alreadyInsertedRow(table, user_id);
   if (!inserted) {
     const { data, error } = await supabase
-      .from(`${table[0].toUpperCase() + table.substring(1)}`)
+      .from(`${capitalize(table)}`)
       .insert(data_to_insert);
     return { data, error };
   }
@@ -76,7 +77,7 @@ export async function GetUser() {
 
 export async function GetRowFromTable(user_id: string, table: string) {
   const { data, error } = await supabase
-    .from(`${table[0].toUpperCase() + table.substring(1)}`)
+    .from(`${capitalize(table)}`)
     .select("*")
     .eq("user_id", user_id);
   if (!error) return data[0];

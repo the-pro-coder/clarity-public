@@ -2,6 +2,9 @@ import DashboardHeader from "@/components/custom/dashboard/DashboardHeader";
 import { Setup, GetRowFromTable } from "./action";
 import { Profile, Preferences, User } from "@/utils/supabase/tableTypes";
 import { Flame } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import capitalize from "@/components/custom/util/Capitalize";
+import NextLessonArea from "@/components/custom/dashboard/NextLessonArea";
 
 // to change later
 const streak = 3;
@@ -15,25 +18,38 @@ export default async function Dashboard() {
   if (user != null) {
     profile = await GetRowFromTable(`${user.user_id}`, "profiles");
     preferences = await GetRowFromTable(`${user.user_id}`, "preferences");
+    const interestSubjects = profile.interest_areas;
     return (
       <main className="flex flex-col gap-10">
         <section>
           <DashboardHeader name={profile.name} last_name={profile.last_name} />
         </section>
-        <section className="max-w-4/5 w-4/5 m-auto flex flex-col gap-6">
-          <h2 className="text-6xl flex items-center gap-5">
-            Hi, {profile?.name ? profile.name + "!" : ""}
-            {streak >= 3 && (
-              <span className="flex items-center outline-4 rounded-full px-4 py-1 justify-center">
-                <Flame size={50} fill="orange" className="text-destructive" />
-                <span className="text-5xl font-bold">{streak}</span>
-              </span>
-            )}
-          </h2>
-          <p className="text-2xl">Ready to continue your learning flow?</p>
-          <h2 className="text-6xl font-bold">
-            {isLessonActive ? "Continue Learning" : "Your Next Step"}
-          </h2>
+        <section className="flex gap-20 max-w-4/5 w-4/5 m-auto">
+          <div className="flex-3 flex flex-col gap-10">
+            <section className=" flex flex-col gap-6">
+              <h2 className="text-6xl flex items-center gap-5">
+                Hi, {profile?.name ? profile.name + "!" : ""}
+                {streak >= 3 && (
+                  <span className="flex hover:bg-accent cursor-default hover:outline-accent transition-colors items-center outline-4 rounded-full px-4 py-1 justify-center">
+                    <Flame
+                      size={50}
+                      fill="orange"
+                      className="text-destructive"
+                    />
+                    <span className="text-5xl font-bold">{streak}</span>
+                  </span>
+                )}
+              </h2>
+              <p className="text-2xl">Ready to continue your learning flow?</p>
+              <h2 className="text-6xl font-bold mt-2 -mb-2">
+                {isLessonActive ? "Continue Learning" : "Your Next Step"}
+              </h2>
+            </section>
+            <section className="flex flex-col gap-6">
+              <NextLessonArea interestSubjects={interestSubjects} />
+            </section>
+          </div>
+          <div className="flex-2 border"></div>
         </section>
       </main>
     );

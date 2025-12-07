@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction } from "react";
 import Link from "next/link";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
+import capitalize from "../util/Capitalize";
 export default function InputField({
   label,
   placeholder,
@@ -23,7 +24,7 @@ export default function InputField({
   binding: Dispatch<SetStateAction<string>>;
   valueBinding?: string;
 }) {
-  label = label[0].toUpperCase() + label.substring(1);
+  label = capitalize(label);
 
   const Annotations: React.ReactNode =
     annotations?.type == "text" ? (
@@ -38,9 +39,7 @@ export default function InputField({
   return (
     <div className="flex flex-col gap-2 w-full m-auto">
       <Label htmlFor={label} className="font-semibold text-secondary">
-        {label
-          .split("_")
-          .map((word) => ` ${word[0].toUpperCase() + word.substring(1)}`)}
+        {label.split("_").map((word) => ` ${capitalize(word)}`)}
         {required ? <span className="text-destructive"> *</span> : ""}
       </Label>
       {valueBinding != null ? (

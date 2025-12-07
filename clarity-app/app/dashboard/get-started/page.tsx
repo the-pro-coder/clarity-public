@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { Profile } from "@/utils/supabase/tableTypes";
+import capitalize from "@/components/custom/util/Capitalize";
 
 const interestAreasDB = ["math", "english"];
 const numberDB = ["one", "two", "three", "four"];
@@ -190,7 +191,7 @@ export default function GetStartedPage() {
                       interestAreas.includes(area) ? "default" : "outline"
                     }
                   >
-                    {area[0].toUpperCase() + area.substring(1)}
+                    {capitalize(area)}
                   </Button>
                 );
               })}
@@ -231,10 +232,7 @@ export default function GetStartedPage() {
       title: "Almost there!",
       subtitle: `${
         numberDB.length > interestAreas.length
-          ? `${
-              numberDB[Math.max(interestAreas.length - 1, 0)][0].toUpperCase() +
-              numberDB[Math.max(interestAreas.length - 1, 0)].substring(1)
-            }   `
+          ? `${capitalize(numberDB[Math.max(interestAreas.length - 1, 0)])}   `
           : "Some "
       }  last question${
         interestAreas.length > 1 ? "s" : ""
