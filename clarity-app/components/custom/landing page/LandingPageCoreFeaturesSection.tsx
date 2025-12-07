@@ -36,7 +36,7 @@ const contentElements = [
 
 export default function LandingPageCoreFeaturesSection() {
   return (
-    <section className="bg-primary-foreground border-t-2 py-10 flex items-center gap-10 flex-col">
+    <section className="bg-secondary-foreground border-t-2 py-10 flex items-center gap-10 flex-col">
       <h2 className="font-bold text-4xl text-center px-5 max-sm:text-3xl">
         {titleContent}
         <hr className="mt-5 border-2 border-dashed border-accent-foreground opacity-60 max-sm:w-[80%] m-auto" />

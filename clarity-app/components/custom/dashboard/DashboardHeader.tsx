@@ -48,7 +48,7 @@ export default function DashboardHeader({
                     notificationCount > 5
                       ? "w-5 text-xs h-5"
                       : "w-[18px] text-[12px] h-[18px]"
-                  } -ml-3 rounded-full text-accent font-bold`}
+                  } -ml-3 rounded-full text-primary-foreground font-bold`}
                 >
                   {notificationCount > 5 ? "5+" : notificationCount}
                 </div>

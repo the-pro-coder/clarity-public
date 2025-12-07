@@ -322,8 +322,8 @@ const lessons: Lesson[] = [
 
 export default function ExploreLessons() {
   return (
-    <Card>
-      <h2 className="text-center text-3xl font-semibold">Explore Lessons</h2>
+    <Card className="flex-3">
+      <h2 className="text-center text-4xl font-semibold">Explore Lessons</h2>
       <div className="w-6/7 px-2 m-auto">
         <ExploreLessonsCard lessons={lessons} />
       </div>

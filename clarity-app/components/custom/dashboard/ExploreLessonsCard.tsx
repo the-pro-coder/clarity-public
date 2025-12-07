@@ -39,7 +39,7 @@ export default function ExploreLessonsCard({ lessons }: { lessons: Lesson[] }) {
                 <p className="flex gap-1.5">
                   {lesson.tags.map((tag, i) => {
                     return (
-                      <Tag key={i} color={"blue"} className="p-1 bg-blue">
+                      <Tag key={i} color={"other"} className="p-1 other">
                         {capitalize(tag)}
                       </Tag>
                     );

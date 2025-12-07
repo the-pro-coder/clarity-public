@@ -11,6 +11,9 @@ import { redirect } from "next/navigation";
 import ExploreTopics from "@/components/custom/dashboard/ExploreTopicsSection";
 import AITutorSection from "@/components/custom/dashboard/AITutorSection";
 import ProgressFeedbackSection from "@/components/custom/dashboard/ProgressFeedbackSection";
+import CircularProgress from "@/components/ui/progress-circular";
+
+import ChartColorPalette from "@/components/custom/util/ChartColorPalette";
 
 // to change later
 const streak = 3;
@@ -43,7 +46,7 @@ export default async function Dashboard() {
               <h2 className="text-6xl flex items-center gap-5">
                 Hi, {profile?.name ? profile.name + "!" : ""}
                 {streak >= 3 && (
-                  <span className="flex hover:bg-accent cursor-default hover:outline-accent transition-colors items-center outline-4 rounded-full px-4 py-1 justify-center">
+                  <span className="flex hover:bg-accent cursor-default hover:outline-accent transition-colors  items-center outline-4 rounded-full px-4 py-1 justify-center">
                     <Flame
                       size={50}
                       fill="orange"
