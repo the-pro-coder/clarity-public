@@ -2,6 +2,7 @@
 import capitalize from "@/components/custom/util/Capitalize";
 import { createClient } from "@/utils/supabase/server";
 import { User, Preferences, Profile } from "@/utils/supabase/tableTypes";
+import { UserResponse } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 
 const supabase = await createClient();
@@ -37,12 +38,11 @@ async function InsertRow(
     return { data, error };
   }
 }
-export async function Setup() {
-  const user = (await supabase.auth.getUser()).data.user;
+export async function Setup(user: { id: string; email: string }) {
   if (user != null) {
     const userDataToInsert: User = {
-      user_id: user?.id || "",
-      email: user?.email || "",
+      user_id: user.id,
+      email: user.email,
     };
     const response = await InsertRow(user?.id || "", "users", userDataToInsert);
     if (response?.error) {

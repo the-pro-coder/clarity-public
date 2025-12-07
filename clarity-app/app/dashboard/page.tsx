@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import capitalize from "@/components/custom/util/Capitalize";
 import NextLessonArea from "@/components/custom/dashboard/NextLessonArea";
 import ImprovementAreaSection from "@/components/custom/dashboard/ImprovementAreaSection";
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
 
 // to change later
 const streak = 3;
@@ -14,7 +16,16 @@ const isLessonActive = true;
 
 export default async function Dashboard() {
   // const [profile, progress, recommendations, settings] = await Promise.all([GetProfile(), GetUser(), GetProgress(), GetRecommendations(), GetSettings()])
-  const user = await Setup();
+  const supabase = await createClient();
+  const userResponse = await supabase.auth.getUser();
+  if (!userResponse) {
+    supabase.auth.refreshSession();
+    redirect("/dashboard");
+  }
+  const user = await Setup({
+    id: userResponse.data.user?.id || "",
+    email: userResponse.data.user?.email || "",
+  });
   let profile: Profile, preferences: Preferences;
   if (user != null) {
     profile = await GetRowFromTable(`${user.user_id}`, "profiles");
@@ -22,9 +33,7 @@ export default async function Dashboard() {
     const interestSubjects = profile.interest_areas;
     return (
       <main className="flex flex-col gap-10">
-        <section>
-          <DashboardHeader name={profile.name} last_name={profile.last_name} />
-        </section>
+        <DashboardHeader name={profile.name} last_name={profile.last_name} />
         <section className="flex gap-15 max-w-4/5 w-4/5 m-auto">
           <div className="flex-3 flex flex-col gap-6 justify-between">
             <section className=" flex flex-col gap-6 flex-1 justify-evenly">

@@ -25,7 +25,7 @@ const leftButtonList: LinkedButton[] = [
 // Define a list of LinkedButtons (the right side buttons) to map them into shadcn Button elements
 
 const rightButtonList: LinkedButton[] = [
-  { text: "Dashboard", _link: "dashboard" },
+  { text: "Dashboard", _link: "authenticate" },
 ];
 
 // Define a CTA message to be included in the CTA button
