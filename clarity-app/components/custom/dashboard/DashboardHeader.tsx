@@ -27,7 +27,7 @@ export default function DashboardHeader({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const notificationCount = notifications.length;
   return (
-    <header className="sticky bg-header backdrop-blur-xs top-0 border-b w-full m-auto h-20 flex max-sm:px-3 gap-4 justify-between pl-3 pr-20 py-2">
+    <header className="sticky bg-header backdrop-blur-xs top-0 border-b w-full m-auto h-20 flex max-sm:px-3 gap-4 justify-between pl-3 pr-20 py-2 z-10">
       <div className="flex items-center gap-4 flex-2">
         <Image
           className=""
