@@ -8,6 +8,9 @@ import NextLessonArea from "@/components/custom/dashboard/NextLessonArea";
 import ImprovementAreaSection from "@/components/custom/dashboard/ImprovementAreaSection";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import ExploreTopics from "@/components/custom/dashboard/ExploreTopicsSection";
+import AITutorSection from "@/components/custom/dashboard/AITutorSection";
+import ProgressFeedbackSection from "@/components/custom/dashboard/ProgressFeedbackSection";
 
 // to change later
 const streak = 3;
@@ -61,6 +64,15 @@ export default async function Dashboard() {
           </div>
           <section className="flex-2">
             <ImprovementAreaSection />
+          </section>
+        </section>
+        <section className="flex-1 grid grid-cols-2 gap-3 grid-rows-3 max-w-4/5 w-4/5 m-auto">
+          <section className="flex flex-col gap-3">
+            <ExploreTopics />
+            <AITutorSection />
+          </section>
+          <section>
+            <ProgressFeedbackSection />
           </section>
         </section>
       </main>

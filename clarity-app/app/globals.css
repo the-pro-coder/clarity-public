@@ -48,6 +48,7 @@ button {
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-secondary-accent: var(--secondary-accent);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -75,6 +76,7 @@ button {
   --muted-foreground: oklch(0.552 0.016 285.938);
   --accent: #f0f0f0;
   --accent-foreground: oklch(0.21 0.006 285.885);
+  --secondary-accent: #ffb7a8;
   --destructive: oklch(0.577 0.245 27.325);
   --border: #c7c7c7;
   --input: oklch(0.92 0.004 286.32);
@@ -109,8 +111,9 @@ button {
   --muted: oklch(0.274 0.006 286.033);
   --muted-foreground: oklch(0.705 0.015 286.067);
   --accent: #464646;
-
   --accent-foreground: oklch(0.985 0 0);
+  --secondary-accent: #8ee3c1;
+
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);

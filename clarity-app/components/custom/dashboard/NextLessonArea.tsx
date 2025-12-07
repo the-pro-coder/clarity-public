@@ -2,25 +2,19 @@
 import { Button } from "@/components/ui/button";
 import capitalize from "../util/Capitalize";
 import { useState } from "react";
-import LessonCardBig, { LessonSection } from "./LessonCardBig";
-const dummyLesson1: {
-  subject: string;
-  unit: number;
-  topic: string;
-  title: string;
-  status: "not started" | "in progress" | "completed";
-  percentageCompleted: number;
-  description: string;
-  lessonSections: LessonSection[];
-} = {
+import LessonCardBig, { Lesson, LessonSection } from "./LessonCardBig";
+const dummyLesson1: Lesson = {
   subject: "Math",
   unit: 2,
   topic: "Trigonometric Identities",
   title: "Cosine: Sine's brother",
   status: "in progress",
+  grade: "10th",
+  category: "theory & practice",
+  tags: ["triangles", "pithagoras", "angles", "identities"],
   percentageCompleted: 0,
-  description:
-    "cosine's identity, which shows the inverse relationship in the triangle from sine.",
+  expectedLearning:
+    "explore cosine's identity, which shows the inverse relationship in the triangle from sine.",
   lessonSections: [
     {
       type: "theory",
@@ -63,24 +57,18 @@ dummyLesson1.percentageCompleted = Math.round(
     100
 );
 
-const dummyLesson2: {
-  subject: string;
-  unit: number;
-  topic: string;
-  title: string;
-  status: "not started" | "in progress" | "completed";
-  percentageCompleted: number;
-  description: string;
-  lessonSections: LessonSection[];
-} = {
+const dummyLesson2: Lesson = {
   subject: "English",
   unit: 3,
   topic: "Analyzing Context",
   title: "Setting: Context's Heart",
   status: "in progress",
+  grade: "12th",
+  category: "analysis",
+  tags: ["place", "time", "story"],
   percentageCompleted: 0,
-  description:
-    "how setting influences context, and how it shapes what we understand from a text.",
+  expectedLearning:
+    "understand how setting influences context, and how it shapes what we understand from a text.",
   lessonSections: [
     {
       type: "theory",

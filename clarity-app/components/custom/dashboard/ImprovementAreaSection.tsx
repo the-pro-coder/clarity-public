@@ -51,6 +51,7 @@ const improvementAreas: ImprovementArea[] = [
   },
 ];
 
+// const improvementAreas: ImprovementArea[] = [];
 export default function ImprovementAreaSection() {
   return (
     <Card className="p-4">

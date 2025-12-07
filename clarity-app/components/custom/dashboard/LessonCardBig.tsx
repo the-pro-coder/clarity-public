@@ -12,7 +12,7 @@ import { Check, GraduationCap, Lightbulb, Sparkles } from "lucide-react";
 import { useState } from "react";
 
 export type LessonSection = {
-  type: "practice" | "theory";
+  type: "practice" | "theory" | "creativity";
   title: string;
   exp: number;
   status: "completed" | "not started";
@@ -22,9 +22,12 @@ export type Lesson = {
   unit: number;
   topic: string;
   title: string;
+  grade: string;
+  category: "theory & practice" | "analysis" | "hands-on practice";
+  tags: string[];
   status: "not started" | "completed" | "in progress";
   percentageCompleted: number;
-  description: string;
+  expectedLearning: string;
   lessonSections: LessonSection[];
 };
 export default function LessonCardBig({ data }: { data: Lesson }) {
@@ -36,7 +39,7 @@ export default function LessonCardBig({ data }: { data: Lesson }) {
     title,
     status,
     percentageCompleted,
-    description,
+    expectedLearning,
     lessonSections,
   } = data;
   return (
@@ -56,7 +59,7 @@ export default function LessonCardBig({ data }: { data: Lesson }) {
         <Progress value={percentageCompleted} className="h-4 w-2/3" />
         <span>{percentageCompleted}%</span>
       </div>
-      <p className="text-lg">You will learn about {description}</p>
+      <p className="text-lg">You will {expectedLearning}</p>
       <hr />
       <div className="flex justify-around">
         <Collapsible

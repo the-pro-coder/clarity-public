@@ -14,8 +14,8 @@ export default function Tag({
   return (
     <span
       onClick={onClick}
-      className={`bg-${
-        color == null ? "primary" : color + "-400"
+      className={`${
+        color == null ? "bg-primary" : "bg-neutral-200 text-secondary"
       } font-medium flex items-center justify-center px-4 rounded-full text-primary-foreground cursor-pointer hover:brightness-80 transition-all ${className}`}
     >
       {children}
