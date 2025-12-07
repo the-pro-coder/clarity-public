@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import capitalize from "../util/Capitalize";
 import { useState } from "react";
 import LessonCardBig, { LessonSection } from "./LessonCardBig";
-
 const dummyLesson1: {
   subject: string;
   unit: number;
@@ -160,16 +159,7 @@ export default function NextLessonArea({
         })}
       </div>
       <div className="w-full">
-        <LessonCardBig
-          subject={dummyLesson.subject}
-          unit={dummyLesson.unit}
-          topic={dummyLesson.topic}
-          title={dummyLesson.title}
-          status={dummyLesson.status}
-          percentageCompleted={dummyLesson.percentageCompleted}
-          description={dummyLesson.description}
-          lessonSections={dummyLesson.lessonSections}
-        />
+        <LessonCardBig data={dummyLesson} />
       </div>
     </div>
   );

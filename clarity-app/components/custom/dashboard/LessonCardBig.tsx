@@ -17,16 +17,7 @@ export type LessonSection = {
   exp: number;
   status: "completed" | "not started";
 };
-export default function LessonCardBig({
-  subject,
-  unit,
-  topic,
-  title,
-  status,
-  percentageCompleted,
-  description,
-  lessonSections,
-}: {
+export type Lesson = {
   subject: string;
   unit: number;
   topic: string;
@@ -35,19 +26,34 @@ export default function LessonCardBig({
   percentageCompleted: number;
   description: string;
   lessonSections: LessonSection[];
-}) {
+};
+export default function LessonCardBig({ data }: { data: Lesson }) {
   const [collapsibleOpen, setCollapsibleOpen] = useState(false);
-
+  const {
+    subject,
+    unit,
+    topic,
+    title,
+    status,
+    percentageCompleted,
+    description,
+    lessonSections,
+  } = data;
   return (
-    <Card className="flex flex-col px-4 py-2 gap-2">
+    <Card className="flex flex-col px-4 py-4 gap-4">
       <div className="flex gap-2">
-        <span className="text-secondary font-medium">{subject}</span>
+        <Button
+          variant={"ghost"}
+          className="text-lg text-secondary rounded-full"
+        >
+          {subject}
+        </Button>
         <Tag>Unit {unit}</Tag>
         <Tag>{topic}</Tag>
       </div>
       <h2 className="text-3xl font-medium">{title}</h2>
       <div className="flex items-center gap-2">
-        <Progress value={percentageCompleted} className="h-4 w-1/2" />
+        <Progress value={percentageCompleted} className="h-4 w-2/3" />
         <span>{percentageCompleted}%</span>
       </div>
       <p className="text-lg">You will learn about {description}</p>
