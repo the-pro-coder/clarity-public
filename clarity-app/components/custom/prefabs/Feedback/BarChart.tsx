@@ -66,14 +66,7 @@ export default function ChartBar({
               cursor={true}
               content={<ChartTooltipContent hideLabel />}
             />
-            <Bar dataKey={yLabel} fill="var(--color-primary)" radius={8}>
-              <LabelList
-                position="insideTop"
-                offset={12}
-                className="fill-foreground text-xl font-bold"
-                fontSize={12}
-              />
-            </Bar>
+            <Bar dataKey={yLabel} radius={8} />
           </BarChart>
         </ChartContainer>
       </CardContent>

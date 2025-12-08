@@ -15,6 +15,7 @@ const progressStartData = [
     area: "Trigonometry",
     subject: "math",
     progress: Math.floor((5 / 6) * 100),
+    fill: "var(--chart-2)",
   },
   {
     area: "Trigonometric Identities",
@@ -34,11 +35,11 @@ const progressStartData = [
 ];
 
 const barChartData = [
-  { day: "Monday", grade: 40 },
-  { day: "Tuesday", grade: 60 },
-  { day: "Wednesday", grade: 30 },
-  { day: "Thursday", grade: 70 },
-  { day: "Friday", grade: 75 },
+  { day: "Monday", grade: 40, fill: "var(--chart-1)" },
+  { day: "Tuesday", grade: 60, fill: "var(--chart-2)" },
+  { day: "Wednesday", grade: 30, fill: "var(--chart-3)" },
+  { day: "Thursday", grade: 70, fill: "var(--chart-4)" },
+  { day: "Friday", grade: 75, fill: "var(--chart-5)" },
 ];
 
 const charts = [
