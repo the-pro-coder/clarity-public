@@ -48,7 +48,7 @@ export default function ExploreLessonsCard({ lessons }: { lessons: Lesson[] }) {
                 <p className="text-lg">You will {lesson.expectedLearning}</p>
                 <div className="flex justify-end">
                   <Button className="text-lg" size={"lg"}>
-                    Add to Track
+                    Add to Unit
                   </Button>
                 </div>
               </Card>

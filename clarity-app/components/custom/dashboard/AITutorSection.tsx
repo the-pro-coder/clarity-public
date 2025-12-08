@@ -11,7 +11,7 @@ export default function AITutorSection() {
       </p>
       <div className="flex w-full items-center mt-5 justify-center gap-3">
         <input
-          className="w-4/5 shadow-md focus:border-primary outline-none focus:outline-none active:outline-none transition-colors p-2 rounded-lg active:shadow-blue-200 focus:shadow-blue-200 active:border-primary border-2"
+          className="w-4/5 shadow-md focus:border-primary outline-none focus:outline-none active:outline-none transition-colors p-2 rounded-lg active:shadow-blue-200 focus:shadow-blue-200 dark:active:shadow-none dark:focus:shadow-none active:border-primary border-2"
           placeholder="Ask something"
         />
         <Button className="h-full w-15">
