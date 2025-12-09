@@ -44,24 +44,24 @@ export default function LessonCardBig({ data }: { data: Lesson }) {
   } = data;
   return (
     <Card className="flex flex-col px-4 py-4 gap-4">
-      <div className="flex gap-2">
+      <div className="flex gap-2 max-md:gap-1.5">
         <Button
           variant={"ghost"}
-          className="text-lg text-secondary rounded-full"
+          className="text-lg self-center text-secondary max-md:text-sm rounded-full"
         >
           {subject}
         </Button>
-        <Tag className="max-md:text-xs max-md:w-fit max-md:text-nowrap max-md:border max-md:px-2">
+        <Tag className="max-md:text-sm max-md:w-fit max-md:text-nowrap max-md:border max-md:px-2">
           Unit {unit}
         </Tag>
-        <Tag className="max-md:text-xs">{topic}</Tag>
+        <Tag className="max-md:text-sm">{topic}</Tag>
       </div>
-      <h2 className="text-3xl font-medium">{title}</h2>
+      <h2 className="text-3xl font-medium max-md:text-2xl">{title}</h2>
       <div className="flex items-center gap-2">
         <Progress value={percentageCompleted} className="h-4 w-2/3" />
         <span>{percentageCompleted}%</span>
       </div>
-      <p className="text-lg">You will {expectedLearning}</p>
+      <p className="text-lg max-md:text-base">You will {expectedLearning}</p>
       <hr />
       <div className="flex justify-around">
         <Collapsible
@@ -72,11 +72,17 @@ export default function LessonCardBig({ data }: { data: Lesson }) {
         >
           <div className="flex w-full justify-between">
             <CollapsibleTrigger>
-              <Button variant={"outline"}>
+              <Button
+                variant={"outline"}
+                className="max-md:px-1.5 max-md:text-xs"
+              >
                 {collapsibleOpen ? "Hide" : "See"} lesson details
               </Button>
             </CollapsibleTrigger>
-            <Button className="w-fit self-end text-lg" size={"lg"}>
+            <Button
+              className="w-fit self-end text-lg max-md:px-4 max-md:text-sm"
+              size={"lg"}
+            >
               {status == "not started" ? "Start" : "Continue"}
             </Button>
           </div>

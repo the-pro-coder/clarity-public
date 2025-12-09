@@ -127,14 +127,14 @@ export default function NextLessonArea({
   const dummyLesson = activeSubject == "math" ? dummyLesson1 : dummyLesson2;
   return (
     <div className="flex flex-2 gap-3 flex-col">
-      <div className="flex gap-3">
+      <div className="flex gap-3 max-md:gap-2">
         {interestSubjects.map((subject, i) => {
           return (
             <Button
               variant={subject == activeSubject ? "default" : "outline"}
               key={i}
               size={"lg"}
-              className={`rounded-full py-6 text-2xl ${
+              className={`rounded-full py-6 max-md:text-lg max-md:px-4 max-md:py-4 text-2xl ${
                 subject == activeSubject ? "border border-transparent" : ""
               }`}
               onClick={() => {

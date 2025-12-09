@@ -826,7 +826,7 @@ export default async function Dashboard() {
         <DashboardHeader name={profile.name} last_name={profile.last_name} />
         <section className="flex max-md:flex-col gap-15 max-w-4/5 w-4/5 m-auto">
           <div className="flex-3 flex flex-col gap-6 justify-between">
-            <section className=" flex flex-col gap-6 flex-1 justify-evenly">
+            <section className=" flex flex-col gap-6 max-md:gap-3 flex-1 justify-evenly">
               <h2 className="text-6xl max-md:text-4xl flex items-center gap-5">
                 <span className="">
                   Hi, {profile?.name ? profile.name + "!" : ""}
@@ -849,8 +849,10 @@ export default async function Dashboard() {
                   </span>
                 )}
               </h2>
-              <p className="text-2xl">Ready to continue your learning flow?</p>
-              <h2 className="text-6xl font-bold mt-2 -mb-2">
+              <p className="text-2xl max-md:text-base">
+                Ready to continue your learning flow?
+              </p>
+              <h2 className="text-6xl font-bold max-md:text-3xl text-nowrap -mb-2">
                 {isLessonActive ? "Continue Learning" : "Your Next Step"}
               </h2>
             </section>
