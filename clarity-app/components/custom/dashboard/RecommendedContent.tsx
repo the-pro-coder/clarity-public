@@ -14,6 +14,12 @@ import {
 } from "@/components/ui/carousel";
 import Tag from "../util/Tag";
 import Image from "next/image";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@radix-ui/react-collapsible";
+import { BicepsFlexed, BookIcon, EyeIcon } from "lucide-react";
 
 export type Topic = {
   title: string;
@@ -105,6 +111,7 @@ export default function RecommendedContent({
                             `/dashboard/recommended-units/default ${i + 1}.png`
                           }
                           alt="Unit Image"
+                          className="object-contain"
                           width={250}
                           height={220}
                         />
@@ -114,7 +121,37 @@ export default function RecommendedContent({
                             {suggestedUnit.content.map((topic, k) => {
                               return (
                                 <li key={k} className="list-disc">
-                                  {topic.title}
+                                  <Collapsible>
+                                    <CollapsibleTrigger className="my-2">
+                                      <span className="text-xl rounded-md px-2  py-2 hover:bg-accent transition-colors">
+                                        {topic.title}
+                                      </span>
+                                    </CollapsibleTrigger>
+                                    <CollapsibleContent className="pb-2">
+                                      {topic.content.map((lesson, j) => {
+                                        return (
+                                          <div
+                                            key={j}
+                                            className="flex p-2 shadow-accent shadow-lg border border-0.5  my-1 cursor-pointer rounded-lg justify-between hover:bg-accent transition-colors"
+                                          >
+                                            <p className="flex items-center gap-2 text-primary font-medium text-[16px]">
+                                              {lesson.category ==
+                                                "analysis" && <EyeIcon />}
+                                              {lesson.category ==
+                                                "hands-on practice" && (
+                                                <BicepsFlexed />
+                                              )}
+                                              {lesson.category ==
+                                                "theory & practice" && (
+                                                <BookIcon />
+                                              )}
+                                              {lesson.title}
+                                            </p>
+                                          </div>
+                                        );
+                                      })}
+                                    </CollapsibleContent>
+                                  </Collapsible>
                                 </li>
                               );
                             })}

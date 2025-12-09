@@ -849,6 +849,9 @@ export default async function Dashboard() {
               <NextLessonArea interestSubjects={interestSubjects} />
             </section>
           </div>
+          <section className="flex-2">
+            <ImprovementAreaSection />
+          </section>
         </section>
         <section className="flex-1 grid grid-cols-2 gap-3 grid-rows-1 mb-10 max-w-4/5 w-4/5 m-auto">
           <section className="flex flex-col gap-3">
