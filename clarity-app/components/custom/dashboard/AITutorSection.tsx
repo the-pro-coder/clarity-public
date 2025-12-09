@@ -2,9 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SendIcon } from "lucide-react";
 
-export default function AITutorSection() {
+export default function AITutorSection({ className }: { className: string }) {
   return (
-    <Card className="flex flex-1 flex-col gap-2 items-center">
+    <Card className={`flex flex-1 flex-col gap-2 items-center ${className}`}>
       <h2 className="text-center text-4xl font-semibold">AI Tutor</h2>
       <p className="text-secondary text-center text-xl">
         Ask Clarity for explanations, flashcards, examples or rapid help.

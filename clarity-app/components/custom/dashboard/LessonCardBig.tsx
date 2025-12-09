@@ -51,8 +51,10 @@ export default function LessonCardBig({ data }: { data: Lesson }) {
         >
           {subject}
         </Button>
-        <Tag>Unit {unit}</Tag>
-        <Tag>{topic}</Tag>
+        <Tag className="max-md:text-xs max-md:w-fit max-md:text-nowrap max-md:border max-md:px-2">
+          Unit {unit}
+        </Tag>
+        <Tag className="max-md:text-xs">{topic}</Tag>
       </div>
       <h2 className="text-3xl font-medium">{title}</h2>
       <div className="flex items-center gap-2">

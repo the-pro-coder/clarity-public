@@ -27,7 +27,7 @@ export default function DashboardHeader({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const notificationCount = notifications.length;
   return (
-    <header className="sticky bg-header backdrop-blur-xs top-0 border-b w-full m-auto h-20 flex max-sm:px-3 gap-4 justify-between pl-3 pr-20 py-2 z-10">
+    <header className="sticky bg-header backdrop-blur-xs top-0 border-b w-full m-auto h-20 flex max-md:px-2 gap-4 justify-between pl-3 pr-20 py-2 z-10">
       <div className="flex items-center gap-4 flex-2">
         <Image
           className=""
@@ -38,7 +38,7 @@ export default function DashboardHeader({
         />
         <div className="max-md:hidden"></div>
       </div>
-      <div className="flex items-center gap-2 max-sm:gap-2 flex-1 justify-end">
+      <div className="flex items-center gap-2 max-md:gap-2 flex-1 justify-end">
         <DropdownMenu>
           <DropdownMenuTrigger className="focus:outline-none">
             <div className="flex flex-row-reverse justify-around">

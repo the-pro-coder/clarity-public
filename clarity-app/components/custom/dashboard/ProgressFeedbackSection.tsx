@@ -60,9 +60,13 @@ const charts = [
   },
 ];
 
-export default function ProgressFeedbackSection() {
+export default function ProgressFeedbackSection({
+  className,
+}: {
+  className: string;
+}) {
   return (
-    <Card className="h-full">
+    <Card className={`h-full ${className}`}>
       <h2 className="text-center text-4xl font-semibold">Your Progress</h2>
       <Carousel className="mx-auto w-5/6">
         <CarouselContent className="w-full">

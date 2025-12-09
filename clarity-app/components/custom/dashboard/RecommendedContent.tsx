@@ -56,18 +56,20 @@ export default function RecommendedContent({
     }
   }, [api]);
   return (
-    <Card className="flex-3 max-w-[60%]">
-      <h2 className="text-center text-4xl font-semibold">
+    <Card
+      className={`flex-3 max-w-[60%] max-md:max-w-9/10 mx-auto max-md:flex-1 max-md:w-full`}
+    >
+      <h2 className="text-center max-md:text-2xl text-4xl font-semibold">
         Recommended Content
       </h2>
-      <div className="gap-3 w-4/5 mx-auto">
+      <div className="gap-3 w-4/5 max-md:w-full mx-auto">
         <div className="px-7 flex gap-3">
           {interestSubjects.map((subject, i) => {
             return (
               <Button
                 key={i}
                 size={"lg"}
-                className={`text-2xl py-6 rounded-full ${
+                className={`text-2xl max-md:text-xl max-md:py-4 py-6 rounded-full ${
                   activeSubject == subject ? "border border-primary" : ""
                 }`}
                 variant={activeSubject == subject ? "default" : "outline"}
@@ -82,48 +84,61 @@ export default function RecommendedContent({
           })}
         </div>
       </div>
-      <Carousel setApi={setApi} className="max-w-4/5 mx-auto">
+      <Carousel
+        setApi={setApi}
+        className="max-w-4/5 max-md:max-w-93/100 mx-auto"
+      >
         <CarouselContent>
           {suggestedUnits
             .filter((suggestedUnit) => suggestedUnit.subject == activeSubject)
             .map((suggestedUnit, i) => {
               if (i < 5) {
                 return (
-                  <CarouselItem key={i} className="flex flex-col gap-3">
-                    <Card className="mx-7 px-7 pb-4 flex flex-col">
-                      <h2 className="font-medium text-3xl flex items-center gap-3">
-                        <span className="flex-3">{suggestedUnit.title}</span>
-                        <span className="flex flex-2 gap-1 h-full items-start text-lg flex-wrap">
+                  <CarouselItem
+                    key={i}
+                    className="flex flex-col gap-3 max-md:h-fit"
+                  >
+                    <Card className="mx-7 max-md:w-full max-md:mx-auto px-7 pb-4 max-md:py-2 max-md:px-2 flex flex-col max-md:gap-4">
+                      <h2 className="font-medium max-md:text-xl text-3xl flex items-center gap-3 max-md:gap-1">
+                        <span className="flex-3 max-md:flex-2">
+                          {suggestedUnit.title}
+                        </span>
+                        <span className="flex max-md:flex-1 flex-2 gap-1 h-full items-start text-lg flex-wrap">
                           {suggestedUnit.tags.map((tag, k) => {
                             return (
-                              <Tag key={k} className="px-2 py-1">
+                              <Tag
+                                key={k}
+                                className="px-2 py-1 max-md:text-xs max-md:px-1.5"
+                              >
                                 {capitalize(tag)}
                               </Tag>
                             );
                           })}
                         </span>
                       </h2>
-                      <p className="text-xl">{suggestedUnit.description}</p>
-                      <div className="flex gap-3">
+                      <p className="text-xl max-md:text-sm">
+                        {suggestedUnit.description}
+                      </p>
+                      <div className="flex gap-3 ">
                         <Image
                           src={
                             suggestedUnit.imageURL ||
                             `/dashboard/recommended-units/default ${i + 1}.png`
                           }
                           alt="Unit Image"
-                          className="object-contain"
+                          className="object-contain max-md:hidden"
                           width={250}
                           height={220}
                         />
-                        <div className="text-lg">
+                        <div className="text-lg max-md:text-base">
                           <p className="font-bold">Content:</p>
-                          <ul className="pl-8">
+                          <ul className="pl-8 max-md:pl-6">
                             {suggestedUnit.content.map((topic, k) => {
                               return (
                                 <li key={k} className="list-disc">
                                   <Collapsible>
-                                    <CollapsibleTrigger className="my-2">
-                                      <span className="text-xl rounded-md px-2  py-2 hover:bg-accent transition-colors">
+                                    <CollapsibleTrigger className="my-2 max-md:my-1">
+                                      <span className="text-xl rounded-md px-2  py-2 hover:bg-accent transition-colors max-md:text-sm">
                                         {topic.title}
                                       </span>
                                     </CollapsibleTrigger>
@@ -134,7 +149,7 @@ export default function RecommendedContent({
                                             key={j}
                                             className="flex p-2 shadow-accent shadow-lg border border-0.5  my-1 cursor-pointer rounded-lg justify-between hover:bg-accent transition-colors"
                                           >
-                                            <p className="flex items-center gap-2 text-primary font-medium text-[16px]">
+                                            <p className="flex items-center gap-2 text-primary font-medium text-base max-md:text-xs">
                                               {lesson.category ==
                                                 "analysis" && <EyeIcon />}
                                               {lesson.category ==
@@ -158,7 +173,7 @@ export default function RecommendedContent({
                           </ul>
                         </div>
                       </div>
-                      <div className="flex justify-end -mt-5">
+                      <div className="flex justify-end -mt-5 max-md:mt-0">
                         <Button className="py-5 text-lg">Add to Track</Button>
                       </div>
                     </Card>
