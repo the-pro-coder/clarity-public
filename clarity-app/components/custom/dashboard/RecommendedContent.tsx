@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import Autoplay from "embla-carousel-autoplay";
 import { useEffect, useState } from "react";
 import capitalize from "../util/Capitalize";
 import { Lesson } from "./LessonCardBig";
@@ -85,6 +86,14 @@ export default function RecommendedContent({
         </div>
       </div>
       <Carousel
+        opts={{ loop: true }}
+        plugins={[
+          Autoplay({
+            delay: 10000,
+            stopOnInteraction: false,
+            stopOnMouseEnter: true,
+          }),
+        ]}
         setApi={setApi}
         className="max-w-4/5 max-lg:max-w-97/100 mx-auto"
       >

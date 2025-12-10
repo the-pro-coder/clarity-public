@@ -1,3 +1,4 @@
+"use client";
 import { Card } from "@/components/ui/card";
 import {
   Carousel,
@@ -6,13 +7,24 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 import { Button } from "@/components/ui/button";
 import { Lesson } from "./LessonCardBig";
 import Tag from "../util/Tag";
 import capitalize from "../util/Capitalize";
 export default function ExploreLessonsCard({ lessons }: { lessons: Lesson[] }) {
   return (
-    <Carousel className="m-auto">
+    <Carousel
+      opts={{ loop: true }}
+      plugins={[
+        Autoplay({
+          delay: 5000,
+          stopOnInteraction: false,
+          stopOnMouseEnter: true,
+        }),
+      ]}
+      className="m-auto"
+    >
       <CarouselContent>
         {lessons.map((lesson: Lesson, i) => {
           return (

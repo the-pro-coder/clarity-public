@@ -1,3 +1,5 @@
+"use client";
+import Autoplay from "embla-carousel-autoplay";
 import {
   Carousel,
   CarouselContent,
@@ -70,7 +72,17 @@ export default function ProgressFeedbackSection({
       <h2 className="text-center text-4xl font-semibold max-md:text-2xl">
         Your Progress
       </h2>
-      <Carousel className="mx-auto w-5/6">
+      <Carousel
+        opts={{ loop: true }}
+        plugins={[
+          Autoplay({
+            delay: 7000,
+            stopOnInteraction: false,
+            stopOnMouseEnter: true,
+          }),
+        ]}
+        className="mx-auto w-5/6"
+      >
         <CarouselContent className="w-full m-auto">
           <CarouselItem className="grid lg:grid-cols-2 max-lg:grid-cols-1 lg:gap-10 lg:grid-rows-2 px-4">
             {progressStartData.map((dataEl, i) => {
