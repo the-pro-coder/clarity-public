@@ -103,15 +103,15 @@ export default function ProgressFeedbackSection({
             return (
               <CarouselItem
                 key={i}
-                className={`flex pl-0 max-w-[95%] max-lg:hidden mx-auto justify-center items-center`}
+                className={`pl-0 max-w-[95%] max-xl:hidden flex mx-auto justify-center items-center`}
               >
                 {chart.chart}
               </CarouselItem>
             );
           })}
         </CarouselContent>
-        <CarouselPrevious className="max-lg:hidden" />
-        <CarouselNext className="max-lg:hidden" />
+        <CarouselPrevious className="max-xl:hidden" />
+        <CarouselNext className="max-xl:hidden" />
       </Carousel>
     </Card>
   );
