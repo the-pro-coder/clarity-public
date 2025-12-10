@@ -44,17 +44,17 @@ export default function LessonCardBig({ data }: { data: Lesson }) {
   } = data;
   return (
     <Card className="flex flex-col px-4 py-4 gap-4">
-      <div className="flex gap-2 max-md:gap-1.5">
+      <div className="flex gap-2 max-md:gap-1.5 flex-wrap">
         <Button
           variant={"ghost"}
           className="text-lg self-center text-secondary max-md:text-sm rounded-full"
         >
           {subject}
         </Button>
-        <Tag className="max-md:text-sm max-md:w-fit max-md:text-nowrap max-md:border max-md:px-2">
+        <Tag className="max-md:text-sm max-sm:text-[clamp(2px, 10px)] max-md:w-fit max-md:text-nowrap max-md:px-2">
           Unit {unit}
         </Tag>
-        <Tag className="max-md:text-sm">{topic}</Tag>
+        <Tag className="max-md:text-sm py-2">{topic}</Tag>
       </div>
       <h2 className="text-3xl font-medium max-md:text-2xl">{title}</h2>
       <div className="flex items-center gap-2">
@@ -70,17 +70,18 @@ export default function LessonCardBig({ data }: { data: Lesson }) {
           }}
           className="flex-1"
         >
-          <div className="flex w-full justify-between">
-            <CollapsibleTrigger>
+          <div className="flex w-full justify-between flex-wrap-reverse">
+            <CollapsibleTrigger className="flex items-center flex-1">
               <Button
                 variant={"outline"}
+                size={"lg"}
                 className="max-md:px-1.5 max-md:text-xs"
               >
                 {collapsibleOpen ? "Hide" : "See"} lesson details
               </Button>
             </CollapsibleTrigger>
             <Button
-              className="w-fit self-end text-lg max-md:px-4 max-md:text-sm"
+              className="w-fit self-end text-lg max-md:px-4 max-md:text-sm my-2"
               size={"lg"}
             >
               {status == "not started" ? "Start" : "Continue"}
@@ -91,19 +92,25 @@ export default function LessonCardBig({ data }: { data: Lesson }) {
               return (
                 <div
                   key={i}
-                  className="flex p-2 cursor-pointer rounded-lg justify-between hover:bg-accent transition-colors"
+                  className="flex p-2 cursor-pointer rounded-lg justify-between hover:bg-accent transition-colors my-1"
                 >
-                  <p className="flex gap-2">
-                    {lessonSection.type == "theory" && <GraduationCap />}
-                    {lessonSection.type == "practice" && <Lightbulb />}
-                    {lessonSection.title}
-                    <Sparkles className="text-primary" />
-                  </p>
-                  <p className="flex gap-2">
-                    {lessonSection.status == "completed" && (
-                      <Check className="text-primary" />
+                  <p className="mr-3">
+                    {lessonSection.type == "theory" && (
+                      <GraduationCap className="inline mr-2" />
                     )}
-                    {lessonSection.exp} EXP
+                    {lessonSection.type == "practice" && (
+                      <Lightbulb className="inline mr-2" />
+                    )}
+                    {lessonSection.title}
+                    <Sparkles className="text-primary inline ml-2" />
+                  </p>
+                  <p>
+                    <span className="text-nowrap text-[clamp(0.5rem, 4rem)]">
+                      {lessonSection.status == "completed" && (
+                        <Check className="text-primary inline mr-2" />
+                      )}
+                      {lessonSection.exp} EXP
+                    </span>
                   </p>
                 </div>
               );

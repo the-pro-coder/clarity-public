@@ -52,22 +52,26 @@ const improvementAreas: ImprovementArea[] = [
 ];
 
 // const improvementAreas: ImprovementArea[] = [];
-export default function ImprovementAreaSection() {
+export default function ImprovementAreaSection({
+  maxDisplayableLessons,
+}: {
+  maxDisplayableLessons: number;
+}) {
   return (
     <Card className="p-4">
-      <h2 className="font-semibold text-2xl">
+      <h2 className="font-semibold text-3xl max-md:text-2xl text-center">
         Work in your areas of improvement
       </h2>
       <div className="flex flex-col">
         {improvementAreas.map((improvementArea, i) => {
-          if (i == 4)
+          if (i == maxDisplayableLessons)
             return (
               <Button variant="ghost" key={i} className="flex w-fit">
                 <p>View All</p>
                 <ChevronRight />
               </Button>
             );
-          if (i < 4) {
+          if (i < maxDisplayableLessons) {
             return <ImprovementAreaCard key={i} data={improvementArea} />;
           }
         })}

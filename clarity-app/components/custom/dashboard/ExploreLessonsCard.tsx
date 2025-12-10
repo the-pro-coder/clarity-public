@@ -18,16 +18,20 @@ export default function ExploreLessonsCard({ lessons }: { lessons: Lesson[] }) {
           return (
             <CarouselItem key={i}>
               <Card className="flex p-4 flex-col gap-3">
-                <p className="flex gap-2 mb-2">
+                <p className="flex gap-2 mb-2 flex-wrap">
                   <Button
                     variant={"ghost"}
                     className="rounded-full text-secondary"
                   >
                     {lesson.subject}
                   </Button>
-                  <Tag>Unit {lesson.unit}</Tag>
-                  <Tag>{lesson.topic}</Tag>
-                  <Tag>
+                  <Tag className="max-md:text-xs max-lg:py-2">
+                    Unit {lesson.unit}
+                  </Tag>
+                  <Tag className="max-md:text-xs max-lg:py-2">
+                    {lesson.topic}
+                  </Tag>
+                  <Tag className="max-md:text-xs max-lg:py-2">
                     {lesson.category.split(" ").map((word, i) => {
                       return `${capitalize(word)}${
                         i == lesson.category.split(" ").length - 1 ? "" : " "
@@ -35,8 +39,10 @@ export default function ExploreLessonsCard({ lessons }: { lessons: Lesson[] }) {
                     })}
                   </Tag>
                 </p>
-                <h2 className="text-3xl font-medium">{lesson.title}</h2>
-                <p className="flex gap-1.5">
+                <h2 className="text-3xl max-lg:text-lg font-medium">
+                  {lesson.title}
+                </h2>
+                <p className="flex max-lg:text-xs max-lg:flex-wrap gap-1.5">
                   {lesson.tags.map((tag, i) => {
                     return (
                       <Tag key={i} color={"other"} className="p-1 other">
@@ -45,9 +51,14 @@ export default function ExploreLessonsCard({ lessons }: { lessons: Lesson[] }) {
                     );
                   })}
                 </p>
-                <p className="text-lg">You will {lesson.expectedLearning}</p>
+                <p className="text-lg max-lg:text-base">
+                  You will {lesson.expectedLearning}
+                </p>
                 <div className="flex justify-end">
-                  <Button className="text-lg" size={"lg"}>
+                  <Button
+                    className="text-lg max-lg:text-base max-lg:px-4"
+                    size={"lg"}
+                  >
                     Add to Unit
                   </Button>
                 </div>

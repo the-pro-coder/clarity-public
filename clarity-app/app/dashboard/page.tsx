@@ -18,17 +18,17 @@ import { UserResponse } from "@supabase/supabase-js";
 
 const recommendedUnits: Unit[] = [
   {
-    title: "Amdebra Foundations",
+    title: "Algebra Foundations",
     number: 1,
-    tags: ["math", "amdebra", "foundations"],
+    tags: ["math", "algebra", "foundations"],
     grade: "9th",
     description:
-      "Introductory unit on amdebraic thinking and linear relationships.",
+      "Introductory unit on algebraic thinking and linear relationships.",
     subject: "math",
     content: [
       {
         title: "Linear Equations",
-        tags: ["math", "amdebra", "linear equations"],
+        tags: ["math", "algebra", "linear equations"],
         grade: "9th",
         subject: "math",
         description:
@@ -632,7 +632,7 @@ const recommendedUnits: Unit[] = [
   {
     title: "Quadratic Functions & Equations",
     number: 7,
-    tags: ["math", "amdebra", "quadratics"],
+    tags: ["math", "algebra", "quadratics"],
     grade: "10th",
     description:
       "Study parabolas, quadratic equations, and different solution methods.",
@@ -824,12 +824,12 @@ export default async function Dashboard() {
     return (
       <main className="flex flex-col gap-10">
         <DashboardHeader name={profile.name} last_name={profile.last_name} />
-        <section className="flex max-md:flex-col gap-15 max-w-4/5 w-4/5 m-auto">
-          <div className="flex-3 flex flex-col gap-6 justify-between">
-            <section className=" flex flex-col gap-6 max-md:gap-3 flex-1 justify-evenly">
+        <section className="flex max-lg:flex-col gap-15 max-w-4/5 w-4/5 m-auto">
+          <div className="flex-3 flex flex-col gap-6 justify-start">
+            <section className=" flex flex-col gap-6 max-md:gap-3 ">
               <h2 className="text-6xl max-md:text-4xl flex items-center gap-5">
-                <span className="">
-                  Hi, {profile?.name ? profile.name + "!" : ""}
+                <span className="text-nowrap">
+                  <span>Hi, {profile?.name ? profile.name + "!" : ""}</span>
                 </span>
                 {streak >= 3 && (
                   <span className="flex max-md:justify-self-start max-md: hover:bg-accent cursor-default hover:outline-accent transition-colors items-center outline-4 rounded-full max-md:px-2 px-4 py-1 justify-center">
@@ -852,7 +852,7 @@ export default async function Dashboard() {
               <p className="text-2xl max-md:text-base">
                 Ready to continue your learning flow?
               </p>
-              <h2 className="text-6xl font-bold max-md:text-3xl text-nowrap -mb-2">
+              <h2 className="text-5xl font-bold max-md:text-3xl -mb-2">
                 {isLessonActive ? "Continue Learning" : "Your Next Step"}
               </h2>
             </section>
@@ -861,21 +861,21 @@ export default async function Dashboard() {
             </section>
           </div>
           <section className="flex-2">
-            <ImprovementAreaSection />
+            <ImprovementAreaSection maxDisplayableLessons={3} />
           </section>
         </section>
-        <section className="flex-1 md:grid md:grid-cols-2 max-md:flex max-md:flex-col gap-3 mb-10 max-w-4/5 w-4/5 m-auto">
-          <section className="flex max-md:flex-1 flex-col gap-3">
+        <section className="flex-1 lg:grid lg:grid-cols-2 max-lg:flex max-lg:flex-col gap-3 mb-10 max-w-4/5 w-4/5 m-auto">
+          <section className="flex max-lg:flex-1 flex-col gap-3">
             <ExploreTopics />
-            <AITutorSection className="max-md:hidden" />
-            <ProgressFeedbackSection className="md:hidden" />
+            <AITutorSection className="max-lg:hidden" />
+            <ProgressFeedbackSection className="lg:hidden" />
           </section>
-          <section className="flex max-md:flex-1 flex-col">
-            <ProgressFeedbackSection className="max-md:hidden" />
-            <AITutorSection className="md:hidden" />
+          <section className="flex max-lg:flex-1 flex-col">
+            <ProgressFeedbackSection className="max-lg:hidden" />
+            <AITutorSection className="lg:hidden" />
           </section>
         </section>
-        <section className="flex-1 max-md:flex-col flex gap-3 mb-10 max-w-4/5 w-4/5 m-auto">
+        <section className="flex-1 max-lg:flex-col flex gap-3 mb-10 max-w-4/5 w-4/5 m-auto">
           <RecommendedContent
             interestSubjects={interestSubjects}
             suggestedUnits={recommendedUnits}

@@ -45,8 +45,10 @@ const insights: Insight[] = [
 
 export default function InsightOfTheDaySection() {
   return (
-    <Card className="flex-2 pb-0 max-w-[40%]">
-      <h2 className="text-center text-4xl font-semibold">Insight of the Day</h2>
+    <Card className="flex-2 pb-0 max-w-[40%] max-lg:max-w-full">
+      <h2 className="text-center text-4xl max-md:text-2xl font-semibold">
+        Daily Insight
+      </h2>
       <div className="flex flex-col h-full">
         <InsightComponent insights={insights} />
       </div>

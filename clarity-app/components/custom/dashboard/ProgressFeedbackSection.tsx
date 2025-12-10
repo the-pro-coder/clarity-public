@@ -67,13 +67,22 @@ export default function ProgressFeedbackSection({
 }) {
   return (
     <Card className={`h-full ${className}`}>
-      <h2 className="text-center text-4xl font-semibold">Your Progress</h2>
+      <h2 className="text-center text-4xl font-semibold max-md:text-2xl">
+        Your Progress
+      </h2>
       <Carousel className="mx-auto w-5/6">
-        <CarouselContent className="w-full">
-          <CarouselItem className="grid grid-cols-2 gap-10 grid-rows-2 px-4">
+        <CarouselContent className="w-full m-auto">
+          <CarouselItem className="grid lg:grid-cols-2 max-lg:grid-cols-1 lg:gap-10 lg:grid-rows-2 px-4">
             {progressStartData.map((dataEl, i) => {
               return (
-                <div className="flex flex-col items-center" key={i}>
+                <div
+                  className={`flex ${
+                    i < progressStartData.length - 1
+                      ? "max-lg:border-b mb-2"
+                      : ""
+                  } flex-col items-center`}
+                  key={i}
+                >
                   <p className="text-secondary font-semibold text-xl">
                     {capitalize(dataEl.subject)}
                   </p>
@@ -82,7 +91,9 @@ export default function ProgressFeedbackSection({
                     size={200}
                     strokeWidth={25}
                   />
-                  <h3 className="text-xl font-medium -mt-1">{dataEl.area}</h3>
+                  <h3 className="text-xl font-medium text-center -mt-1">
+                    {dataEl.area}
+                  </h3>
                   <p className="text-center text-lg">{dataEl.progress}%</p>
                 </div>
               );
@@ -92,15 +103,15 @@ export default function ProgressFeedbackSection({
             return (
               <CarouselItem
                 key={i}
-                className="flex pl-0 max-w-[95%] mx-auto justify-center items-center"
+                className={`flex pl-0 max-w-[95%] max-lg:hidden mx-auto justify-center items-center`}
               >
                 {chart.chart}
               </CarouselItem>
             );
           })}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        <CarouselPrevious className="max-lg:hidden" />
+        <CarouselNext className="max-lg:hidden" />
       </Carousel>
     </Card>
   );

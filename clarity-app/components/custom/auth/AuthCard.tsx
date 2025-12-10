@@ -160,7 +160,7 @@ export default function AuthCard() {
         <Button
           type="submit"
           disabled={loading}
-          className="text-white py-5 dark:text-accent font-bold text-md w-full self-center"
+          className="py-5 font-bold text-md w-full self-center"
         >
           {CTA}
         </Button>

@@ -16,11 +16,17 @@ export default function ImprovementAreaCard({
       <div className="flex flex-col w-full">
         <h3 className="text-secondary">{subject}</h3>
         <div>
-          <h2 className="text-primary font-bold text-2xl flex gap-2 items-center">
-            <span>{title}</span>
-            {category == "creativity" && <SparklesIcon />}
-            {category == "theory" && <BookOpen />}
-            {category == "practice" && <FlaskConical />}
+          <h2 className="text-primary font-bold text-2xl flex items-center">
+            <span>
+              {title}
+              {category == "creativity" && (
+                <SparklesIcon className="inline ml-2" />
+              )}
+              {category == "theory" && <BookOpen className="inline ml-2" />}
+              {category == "practice" && (
+                <FlaskConical className="inline ml-2" />
+              )}
+            </span>
           </h2>
           <p>
             You need to improve{" "}

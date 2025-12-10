@@ -323,8 +323,10 @@ const lessons: Lesson[] = [
 export default function ExploreLessons() {
   return (
     <Card className="flex-3">
-      <h2 className="text-center text-4xl font-semibold">Explore Lessons</h2>
-      <div className="w-6/7 px-2 m-auto">
+      <h2 className="text-center text-4xl max-md:text-2xl font-semibold">
+        Explore Lessons
+      </h2>
+      <div className="w-6/7 max-lg:max-w-97/100 px-2 mx-auto">
         <ExploreLessonsCard lessons={lessons} />
       </div>
     </Card>

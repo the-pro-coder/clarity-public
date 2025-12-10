@@ -57,19 +57,19 @@ export default function RecommendedContent({
   }, [api]);
   return (
     <Card
-      className={`flex-3 max-w-[60%] max-md:max-w-9/10 mx-auto max-md:flex-1 max-md:w-full`}
+      className={`flex-3 max-w-[60%] max-lg:max-w-full mx-auto max-lg:flex-1 max-lg:w-full`}
     >
       <h2 className="text-center max-md:text-2xl text-4xl font-semibold">
         Recommended Content
       </h2>
-      <div className="gap-3 w-4/5 max-md:w-full mx-auto">
-        <div className="px-7 flex gap-3">
+      <div className="gap-3 w-4/5 max-lg:w-full mx-auto">
+        <div className="px-7 max-lg:flex-wrap max-lg:px-0 max-lg:gap-1.5 flex gap-3 max-lg:max-w-93/100 max-lg:mx-auto">
           {interestSubjects.map((subject, i) => {
             return (
               <Button
                 key={i}
                 size={"lg"}
-                className={`text-2xl max-md:text-xl max-md:py-4 py-6 rounded-full ${
+                className={`text-2xl max-md:text-lg max-md:py-4 max-md:px-4 py-6 rounded-full ${
                   activeSubject == subject ? "border border-primary" : ""
                 }`}
                 variant={activeSubject == subject ? "default" : "outline"}
@@ -86,7 +86,7 @@ export default function RecommendedContent({
       </div>
       <Carousel
         setApi={setApi}
-        className="max-w-4/5 max-md:max-w-93/100 mx-auto"
+        className="max-w-4/5 max-lg:max-w-97/100 mx-auto"
       >
         <CarouselContent>
           {suggestedUnits
@@ -98,49 +98,63 @@ export default function RecommendedContent({
                     key={i}
                     className="flex flex-col gap-3 max-md:h-fit"
                   >
-                    <Card className="mx-7 max-md:w-full max-md:mx-auto px-7 pb-4 max-md:py-2 max-md:px-2 flex flex-col max-md:gap-4">
-                      <h2 className="font-medium max-md:text-xl text-3xl flex items-center gap-3 max-md:gap-1">
-                        <span className="flex-3 max-md:flex-2">
-                          {suggestedUnit.title}
-                        </span>
-                        <span className="flex max-md:flex-1 flex-2 gap-1 h-full items-start text-lg flex-wrap">
-                          {suggestedUnit.tags.map((tag, k) => {
-                            return (
-                              <Tag
-                                key={k}
-                                className="px-2 py-1 max-md:text-xs max-md:px-1.5"
-                              >
-                                {capitalize(tag)}
-                              </Tag>
-                            );
-                          })}
+                    <Card className="mx-7 max-md:w-9/10 max-md:mx-auto px-7 pb-4 max-md:py-2 max-md:px-2 flex flex-col max-md:gap-4">
+                      <h2 className="font-medium max-md:text-xl max-lg:text-2xl text-3xl flex items-center gap-3 max-md:gap-1">
+                        <span className="flex-3 max-md:flex-2 text-wrap">
+                          <span className="block mb-2">
+                            {suggestedUnit.title}
+                          </span>
+                          <span className="flex gap-1 flex-wrap">
+                            {suggestedUnit.tags.map((tag, k) => {
+                              return (
+                                <Tag
+                                  key={k}
+                                  className="text-base py-1 max-md:text-sm"
+                                >
+                                  {capitalize(tag)}
+                                </Tag>
+                              );
+                            })}
+                          </span>
                         </span>
                       </h2>
                       <p className="text-xl max-md:text-sm">
                         {suggestedUnit.description}
                       </p>
-                      <div className="flex gap-3 ">
+                      <div className="flex gap-3 items-start">
                         <Image
                           src={
                             suggestedUnit.imageURL ||
                             `/dashboard/recommended-units/default ${i + 1}.png`
                           }
                           alt="Unit Image"
-                          className="object-contain max-md:hidden"
+                          className="object-contain max-xl:hidden xl:visible"
                           width={250}
                           height={220}
+                        />
+                        <Image
+                          src={
+                            suggestedUnit.imageURL ||
+                            `/dashboard/recommended-units/default ${i + 1}.png`
+                          }
+                          alt="Unit Image"
+                          className="object-contain max-lg:hidden xl:hidden"
+                          width={100}
+                          height={100}
                         />
                         <div className="text-lg max-md:text-base">
                           <p className="font-bold">Content:</p>
                           <ul className="pl-8 max-md:pl-6">
                             {suggestedUnit.content.map((topic, k) => {
                               return (
-                                <li key={k} className="list-disc">
+                                <li key={k} className="list-disc flex-2">
                                   <Collapsible>
                                     <CollapsibleTrigger className="my-2 max-md:my-1">
-                                      <span className="text-xl rounded-md px-2  py-2 hover:bg-accent transition-colors max-md:text-sm">
-                                        {topic.title}
-                                      </span>
+                                      <button className="text-base border-2 hover:bg-primary hover:border-primary hover:text-primary-foreground border-accent max-w-full rounded-md px-2 py-2 transition-colors max-md:text-sm max-lg:text-base max-sm:text-[11px]">
+                                        <span className="w-full">
+                                          {topic.title}
+                                        </span>
+                                      </button>
                                     </CollapsibleTrigger>
                                     <CollapsibleContent className="pb-2">
                                       {topic.content.map((lesson, j) => {
