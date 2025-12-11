@@ -158,12 +158,14 @@ export default function RecommendedContent({
                               return (
                                 <li key={k} className="list-disc flex-2">
                                   <Collapsible>
-                                    <CollapsibleTrigger className="my-2 max-md:my-1">
-                                      <button className="text-base border-2 hover:bg-primary hover:border-primary hover:text-primary-foreground border-accent max-w-full rounded-md px-2 py-2 transition-colors max-md:text-sm max-lg:text-base max-sm:text-[11px]">
-                                        <span className="w-full">
-                                          {topic.title}
-                                        </span>
-                                      </button>
+                                    <CollapsibleTrigger asChild>
+                                      <div className="my-2 max-md:my-1">
+                                        <button className="text-base border-2 hover:bg-primary hover:border-primary hover:text-primary-foreground border-accent max-w-full rounded-md px-2 py-2 transition-colors max-md:text-sm max-lg:text-base max-sm:text-[11px]">
+                                          <span className="w-full">
+                                            {topic.title}
+                                          </span>
+                                        </button>
+                                      </div>
                                     </CollapsibleTrigger>
                                     <CollapsibleContent className="pb-2">
                                       {topic.content.map((lesson, j) => {

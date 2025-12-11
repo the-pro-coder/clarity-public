@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import capitalize from "../util/Capitalize";
+import { toast } from "sonner";
 export default function InputField({
   label,
   placeholder,
@@ -11,6 +12,7 @@ export default function InputField({
   annotations,
   binding,
   valueBinding,
+  maxLength,
 }: {
   label: string;
   placeholder: string;
@@ -21,6 +23,7 @@ export default function InputField({
     type: string;
     href: string;
   };
+  maxLength?: number;
   binding: Dispatch<SetStateAction<string>>;
   valueBinding?: string;
 }) {
@@ -51,7 +54,21 @@ export default function InputField({
           value={valueBinding}
           className="bg-accent"
           onChange={(e) => {
-            binding(e.target.value);
+            if (maxLength != undefined && e.target.value.length <= maxLength) {
+              binding(e.target.value);
+            } else if (maxLength == undefined) {
+              binding(e.target.value);
+            } else {
+              toast.error(
+                `${maxLength} caracters only in ${label
+                  .split("_")
+                  .map((word) => `${capitalize(word)}`)
+                  .join(" ")}`,
+                {
+                  position: "top-center",
+                }
+              );
+            }
           }}
           placeholder={placeholder}
         />

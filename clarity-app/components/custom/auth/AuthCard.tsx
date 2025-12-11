@@ -146,6 +146,8 @@ export default function AuthCard() {
           required
           label="email"
           type="email"
+          valueBinding={email}
+          maxLength={254}
           placeholder={"email@example.com"}
           binding={setEmail}
         />
@@ -153,9 +155,11 @@ export default function AuthCard() {
           required
           label="password"
           type="password"
+          maxLength={64}
           placeholder={"********"}
           annotations={passwordAnnotations}
           binding={setPassword}
+          valueBinding={password}
         />
         <Button
           type="submit"

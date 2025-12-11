@@ -101,6 +101,7 @@ export default function GetStartedPage() {
               label="name"
               placeholder="Your name"
               type="text"
+              maxLength={20}
               valueBinding={name}
               binding={setName}
               required
@@ -109,6 +110,7 @@ export default function GetStartedPage() {
               label="last_name"
               placeholder="Your last name"
               type="text"
+              maxLength={30}
               binding={setLastName}
               valueBinding={lastName}
               required
@@ -119,6 +121,7 @@ export default function GetStartedPage() {
               label="public_username"
               placeholder="Your username"
               type="text"
+              maxLength={20}
               binding={setUsername}
               valueBinding={username}
               required
@@ -290,7 +293,6 @@ export default function GetStartedPage() {
         return data.data.user;
       })
       .then((user) => {
-        console.log(user);
         const dataToInsert: Profile = {
           user_id: user?.id || "",
           name,
@@ -321,8 +323,8 @@ export default function GetStartedPage() {
       <Progress value={(currentPage / 3) * 100} />
       <div className="flex h-full pt-15 flex-col items-center gap-5 justify-center">
         <div className="bg-blue-200 dark:bg-primary py-2 px-4 flex gap-2 rounded-full">
-          <BookOpenIcon className="text-primary dark:text-blue-200" />
-          <span className="text-primary dark:text-blue-200 font-semibold">
+          <BookOpenIcon className="text-primary dark:text-sky-100" />
+          <span className="text-primary dark:text-sky-100 font-semibold">
             Step {currentPage} of {totalPages}
           </span>
         </div>
@@ -374,7 +376,6 @@ export default function GetStartedPage() {
                       break;
                     }
                   }
-                  console.log(confidenceStatus);
                   if (canContinue) {
                     pushData();
                   } else {

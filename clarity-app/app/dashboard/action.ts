@@ -4,13 +4,11 @@ import { createClient } from "@/utils/supabase/server";
 import { User, Preferences, Profile } from "@/utils/supabase/tableTypes";
 import { UserResponse } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
-
-const supabase = await createClient();
-
 async function alreadyInsertedRow(
   table: string,
   user_id: string
 ): Promise<boolean> {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from(`${capitalize(table)}`)
     .select("user_id")
@@ -30,6 +28,7 @@ async function InsertRow(
   table: string,
   data_to_insert: Profile | User | Preferences
 ) {
+  const supabase = await createClient();
   const inserted = await alreadyInsertedRow(table, user_id);
   if (!inserted) {
     const { data, error } = await supabase
@@ -62,6 +61,7 @@ export async function Setup(user: { id: string; email: string }) {
       user?.id || ""
     );
     if (!alreadyInsertedProfile) redirect("/dashboard/get-started");
+    const supabase = await createClient();
     const { data, error } = await supabase
       .from("Users")
       .select("*")
@@ -71,11 +71,13 @@ export async function Setup(user: { id: string; email: string }) {
 }
 
 export async function GetUser() {
+  const supabase = await createClient();
   const user = (await supabase.auth.getUser()).data.user;
   return user;
 }
 
 export async function GetRowFromTable(user_id: string, table: string) {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from(`${capitalize(table)}`)
     .select("*")

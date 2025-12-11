@@ -71,14 +71,16 @@ export default function LessonCardBig({ data }: { data: Lesson }) {
           className="flex-1"
         >
           <div className="flex w-full justify-between flex-wrap-reverse">
-            <CollapsibleTrigger className="flex items-center flex-1">
-              <Button
-                variant={"outline"}
-                size={"lg"}
-                className="max-md:px-1.5 max-md:text-xs"
-              >
-                {collapsibleOpen ? "Hide" : "See"} lesson details
-              </Button>
+            <CollapsibleTrigger asChild className="flex items-center flex-1">
+              <div className="flex items-center flex-1">
+                <Button
+                  variant={"outline"}
+                  size={"lg"}
+                  className="max-md:px-1.5 max-md:text-xs"
+                >
+                  {collapsibleOpen ? "Hide" : "See"} lesson details
+                </Button>
+              </div>
             </CollapsibleTrigger>
             <Button
               className="w-fit self-end text-lg max-md:px-4 max-md:text-sm my-2"

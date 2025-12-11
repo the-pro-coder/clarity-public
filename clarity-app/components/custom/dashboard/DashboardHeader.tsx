@@ -84,6 +84,7 @@ export default function DashboardHeader({
           }}
         >
           <DropdownMenuTrigger
+            asChild
             className={`focus:outline-none ${dropdownOpen ? "rotate-180" : ""}`}
           >
             <button className="w-fit h-fit flex items-center">

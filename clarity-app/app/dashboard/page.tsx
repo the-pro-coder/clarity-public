@@ -809,8 +809,8 @@ export default async function Dashboard() {
   const supabase = await createClient();
   const userResponse: UserResponse = await supabase.auth.getUser();
   if (userResponse.error) {
-    supabase.auth.refreshSession();
-    redirect("/dashboard");
+    console.error(userResponse.error);
+    throw userResponse.error;
   }
   const user = await Setup({
     id: userResponse.data.user?.id || "",
