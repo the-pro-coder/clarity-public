@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import AuthCard from "@/components/custom/auth/AuthCard";
 import { Card } from "@/components/ui/card";
 import ServicesHeaderTemplate from "@/components/custom/util/ServicesHeaderTemplate";
@@ -6,6 +7,10 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
 type ExternalProviders = "Google" | "Microsoft" | "Discord";
+
+export const metadata: Metadata = {
+  title: "Clarity - Authenticate",
+};
 
 async function CheckIfLoggedIn() {
   const supabase = await createClient();

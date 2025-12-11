@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import DashboardHeader from "@/components/custom/dashboard/DashboardHeader";
 import { Setup, GetRowFromTable } from "./action";
 import { Profile, Preferences, User } from "@/utils/supabase/tableTypes";
@@ -15,6 +16,10 @@ import RecommendedContent, {
 } from "@/components/custom/dashboard/RecommendedContent";
 import InsightOfTheDaySection from "@/components/custom/dashboard/InsightOfTheDaySection";
 import { UserResponse } from "@supabase/supabase-js";
+
+export const metadata: Metadata = {
+  title: "Clarity - Dashboard",
+};
 
 const recommendedUnits: Unit[] = [
   {
