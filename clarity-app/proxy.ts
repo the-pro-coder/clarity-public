@@ -1,13 +1,19 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getUser, updateSession } from "./utils/supabase/middleware";
 
-export async function proxy(request: NextRequest, response: NextResponse) {
-  const protectedRoutes = ["/dashboard", "/dashboard/get-started"];
+export default async function proxy(
+  request: NextRequest,
+  response: NextResponse
+) {
+  const protectedRoutes = ["/dashboard", "/lessons"];
   const path = new URL(request.url).pathname;
+  const isProtectedRoute = protectedRoutes.some(
+    (route) => path === route || path.startsWith(`${route}/`)
+  );
   const {
     data: { user },
   } = await getUser(request, response);
-  if (protectedRoutes.includes(path) && !user) {
+  if (isProtectedRoute && !user) {
     return NextResponse.redirect(new URL("/authenticate", request.url));
   }
   return await updateSession(request);

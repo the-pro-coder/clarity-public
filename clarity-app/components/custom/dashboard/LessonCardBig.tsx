@@ -10,15 +10,19 @@ import {
 } from "@/components/ui/collapsible";
 import { Check, GraduationCap, Lightbulb, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { LessonSectionContent } from "../lessons/lesson/LessonCard";
 
 export type LessonSection = {
   type: "practice" | "theory" | "creativity";
   title: string;
   exp: number;
-  status: "completed" | "not started";
+  content?: LessonSectionContent;
+  status: "completed" | "not started" | "incorrect";
 };
 export type Lesson = {
   subject: string;
+  approximateDuration: number;
   unit: number;
   topic: string;
   title: string;
@@ -28,6 +32,7 @@ export type Lesson = {
   status: "not started" | "completed" | "in progress";
   percentageCompleted: number;
   expectedLearning: string;
+  lessonId: string;
   lessonSections: LessonSection[];
 };
 export default function LessonCardBig({ data }: { data: Lesson }) {
@@ -42,6 +47,7 @@ export default function LessonCardBig({ data }: { data: Lesson }) {
     expectedLearning,
     lessonSections,
   } = data;
+  const router = useRouter();
   return (
     <Card className="flex flex-col px-4 py-4 gap-4">
       <div className="flex gap-2 max-md:gap-1.5 flex-wrap">
@@ -85,6 +91,9 @@ export default function LessonCardBig({ data }: { data: Lesson }) {
             <Button
               className="w-fit self-end text-lg max-md:px-4 max-md:text-sm my-2"
               size={"lg"}
+              onClick={() => {
+                router.push(`lessons/${data.lessonId}`);
+              }}
             >
               {status == "not started" ? "Start" : "Continue"}
             </Button>
