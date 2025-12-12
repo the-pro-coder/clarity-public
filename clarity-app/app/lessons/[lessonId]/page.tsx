@@ -2,172 +2,222 @@ import { Lesson } from "@/components/custom/dashboard/LessonCardBig";
 import LessonContent from "@/components/custom/lessons/lesson/LessonContent";
 import LessonHeader from "@/components/custom/lessons/lesson/LessonHeader";
 import { Fragment } from "react/jsx-runtime";
-const dummyLesson1: Lesson = {
+
+const mathLesson: Lesson = {
   subject: "Math",
-  unit: 2,
-  approximateDuration: 10,
-  topic: "Trigonometric Identities",
-  lessonId: "Dummy_lesson_456",
-  title: "Cosine: Sine's brother",
-  status: "in progress",
-  grade: "10th",
+  approximateDuration: 20,
+  unit: 1,
+  topic: "Fractions",
+  title: "Understanding Fractions",
+  grade: "5th Grade",
   category: "theory & practice",
-  tags: ["triangles", "pithagoras", "angles", "identities"],
+  tags: ["fractions", "numerator", "denominator", "basics"],
+  status: "not started",
   percentageCompleted: 0,
   expectedLearning:
-    "explore cosine's identity, which shows the inverse relationship in the triangle from sine.",
+    "Understand what fractions represent and correctly identify simple fractions in common situations.",
+  lessonId: "math-fractions-001",
   lessonSections: [
     {
       type: "theory",
-      title: "What is a cosine?",
+      title: "What Is a Fraction?",
+      exp: 10,
+      status: "not started",
       content: {
         type: "theory",
         sentences: [
-          "One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin.",
-          " He lay on his armour-like back, and if he lifted his head a little he could see his brown belly, slightly domed and divided by arches into stiff sections.",
-          " The bedding was hardly able to cover it and seemed ready to slide off any moment.",
-          " His many legs, pitifully thin compared with the size of the rest of him, waved about helplessly as he looked.",
-          ` "What's happened to me?" he thought.`,
+          "A fraction represents a part of a whole.",
+          "The numerator tells how many parts we have.",
+          "The denominator tells how many equal parts the whole is divided into.",
+          "For example, 1/4 means one part out of four equal parts.",
         ],
       },
-      exp: 50,
-      status: "completed",
-    },
-    {
-      type: "theory",
-      title: "How to get a cosine?",
-      content: {
-        type: "theory",
-        sentences: [
-          " The bedding was hardly able to cover it and seemed ready to slide off any moment.",
-          " His many legs, pitifully thin compared with the size of the rest of him, waved about helplessly as he looked.",
-          ` "What's happened to me?" he thought.`,
-        ],
-      },
-      exp: 50,
-      status: "completed",
     },
     {
       type: "practice",
-      title: "Getting a cosine from a triangle",
+      title: "Identify One Fourth",
+      exp: 15,
+      status: "not started",
       content: {
         type: "practice",
         question: "Which fraction represents one part out of four equal parts?",
+        explanation:
+          "The denominator 4 means the whole is split into four equal pieces, and the numerator 1 means we take one piece: 1/4.",
         answers: [
           { text: "1/4", correct: true },
           { text: "4/1", correct: false },
           { text: "2/4", correct: false },
           { text: "1/2", correct: false },
         ],
-        explanation:
-          "A fraction shows how many parts we take out of a whole. The denominator tells us the whole is divided into four equal parts, and the numerator tells us we take one of those parts. That is exactly what one quarter means.",
       },
-      exp: 100,
-      status: "not started",
     },
     {
       type: "theory",
-      title: "How does the cosine relate to the sine?",
+      title: "Equivalent Fractions",
+      exp: 10,
+      status: "not started",
       content: {
         type: "theory",
         sentences: [
-          " The cosine directly relates to the sine.",
-          " His many legs, pitifully thin compared with the size of the rest of him, waved about helplessly as he looked.",
-          ` "What's happened to me?" he thought.`,
+          "Equivalent fractions represent the same value even if they look different.",
+          "You can make equivalent fractions by multiplying or dividing the numerator and denominator by the same number.",
+          "For example, 1/2 is equivalent to 2/4.",
+          "This works because you are scaling the fraction without changing its value.",
         ],
       },
-      exp: 50,
-      status: "not started",
     },
     {
       type: "practice",
-      title: "Inverse trigonometrics",
+      title: "Find an Equivalent Fraction",
+      exp: 15,
+      status: "not started",
       content: {
         type: "practice",
-        question: "What is the value of x in the equation x + 3 = 7?",
-        answers: [
-          { text: "4", correct: true },
-          { text: "10", correct: false },
-          { text: "3", correct: false },
-          { text: "7", correct: false },
-        ],
+        question: "Which fraction is equivalent to 1/2?",
         explanation:
-          "The equation says x plus three equals seven. To find x, we subtract three from both sides. Seven minus three equals four, so x must be four for the equation to be true.",
+          "An equivalent fraction is made by multiplying numerator and denominator by the same number. 1/2 × 2/2 = 2/4.",
+        answers: [
+          { text: "2/4", correct: true },
+          { text: "1/4", correct: false },
+          { text: "2/3", correct: false },
+          { text: "3/2", correct: false },
+        ],
       },
-      exp: 100,
-      status: "not started",
-    },
-  ],
-};
-
-dummyLesson1.percentageCompleted = Math.round(
-  (dummyLesson1.lessonSections.filter((lesson) => {
-    return lesson.status == "completed";
-  }).length /
-    dummyLesson1.lessonSections.length) *
-    100
-);
-
-const dummyLesson2: Lesson = {
-  subject: "English",
-  unit: 3,
-  topic: "Analyzing Context",
-  title: "Setting: Context's Heart",
-  approximateDuration: 7,
-  status: "in progress",
-  grade: "12th",
-  lessonId: "dummy_id_123",
-  category: "analysis",
-  tags: ["place", "time", "story"],
-  percentageCompleted: 0,
-  expectedLearning:
-    "understand how setting influences context, and how it shapes what we understand from a text.",
-  lessonSections: [
-    {
-      type: "theory",
-      title: "What is setting?",
-      exp: 50,
-      status: "completed",
-    },
-    {
-      type: "theory",
-      title: "How is setting built?",
-      exp: 50,
-      status: "completed",
-    },
-    {
-      type: "practice",
-      title: "Analyzing setting from an example",
-      exp: 100,
-      status: "completed",
-    },
-    {
-      type: "theory",
-      title:
-        "Setting's matices: where does it shape context and where does it end",
-      exp: 50,
-      status: "completed",
-    },
-    {
-      type: "theory",
-      title: "The elements of setting",
-      exp: 100,
-      status: "completed",
     },
     {
       type: "creativity",
-      title: "Create your own setting",
-      exp: 100,
+      title: "Fractions in Your World",
+      exp: 25,
       status: "not started",
+      content: {
+        type: "creativity",
+        instructions:
+          "Write a short paragraph describing a real-life situation where you use fractions (food, time, sports, money, etc.). Include at least two fractions and explain what each fraction means.",
+        tips: [
+          "Use a situation you actually experience (pizza slices, recipe measurements, sharing snacks).",
+          "Explain what the denominator represents (the total equal parts).",
+          "Explain what the numerator represents (how many parts you take).",
+        ],
+        minCharacters: 80,
+      },
     },
   ],
 };
 
-dummyLesson2.percentageCompleted = Math.round(
-  (dummyLesson2.lessonSections.filter((lesson) => {
+const englishLesson: Lesson = {
+  subject: "English",
+  approximateDuration: 20,
+  unit: 1,
+  topic: "Nouns & Sentences",
+  title: "Building Clear Sentences",
+  grade: "5th Grade",
+  category: "theory & practice",
+  tags: ["nouns", "proper nouns", "sentences", "punctuation"],
+  status: "not started",
+  percentageCompleted: 0,
+  expectedLearning:
+    "Identify common vs proper nouns and recognize what makes a sentence complete and correctly punctuated.",
+  lessonId: "eng-nouns-001",
+  lessonSections: [
+    {
+      type: "theory",
+      title: "Nouns: Common vs Proper",
+      exp: 10,
+      status: "not started",
+      content: {
+        type: "theory",
+        sentences: [
+          "A noun is a word that names a person, place, thing, or idea.",
+          "Common nouns name general people or things (school, city, teacher).",
+          "Proper nouns name specific people or places (Ms. Rivera, Mexico, London).",
+          "Proper nouns always start with a capital letter.",
+        ],
+      },
+    },
+    {
+      type: "practice",
+      title: "Spot the Proper Noun",
+      exp: 15,
+      status: "not started",
+      content: {
+        type: "practice",
+        question: "Which word is a proper noun?",
+        explanation:
+          "A proper noun names a specific place and is capitalized. London is the name of a specific city.",
+        answers: [
+          { text: "city", correct: false },
+          { text: "teacher", correct: false },
+          { text: "London", correct: true },
+          { text: "dog", correct: false },
+        ],
+      },
+    },
+    {
+      type: "theory",
+      title: "What Makes a Sentence?",
+      exp: 10,
+      status: "not started",
+      content: {
+        type: "theory",
+        sentences: [
+          "A sentence expresses a complete idea.",
+          "Most sentences have a subject (who/what) and a predicate (what happens).",
+          "Sentences start with a capital letter.",
+          "Sentences end with punctuation like a period, question mark, or exclamation mark.",
+        ],
+      },
+    },
+    {
+      type: "practice",
+      title: "Pick the Correct Sentence",
+      exp: 15,
+      status: "not started",
+      content: {
+        type: "practice",
+        question: "Which sentence is written correctly?",
+        explanation:
+          "It begins with a capital letter and ends with a question mark because it is a question.",
+        answers: [
+          { text: "where are you going?", correct: false },
+          { text: "Where are you going", correct: false },
+          { text: "Where are you going?", correct: true },
+          { text: "Where are you going.", correct: false },
+        ],
+      },
+    },
+    {
+      type: "creativity",
+      title: "Write a Mini Story",
+      exp: 25,
+      status: "not started",
+      content: {
+        type: "creativity",
+        instructions:
+          "Write a short mini story (3–5 sentences). Use at least one proper noun and at least three common nouns. Make sure every sentence is punctuated correctly.",
+        tips: [
+          "Underline (mentally) your proper noun: a specific person or place.",
+          "Include common nouns like 'dog', 'park', 'backpack', or 'music'.",
+          "Check that each sentence starts with a capital letter and ends with punctuation.",
+        ],
+        minCharacters: 120,
+      },
+    },
+  ],
+};
+
+mathLesson.percentageCompleted = Math.round(
+  (mathLesson.lessonSections.filter((lesson) => {
     return lesson.status == "completed";
   }).length /
-    dummyLesson2.lessonSections.length) *
+    mathLesson.lessonSections.length) *
+    100
+);
+
+englishLesson.percentageCompleted = Math.round(
+  (englishLesson.lessonSections.filter((lesson) => {
+    return lesson.status == "completed";
+  }).length /
+    englishLesson.lessonSections.length) *
     100
 );
 
@@ -178,7 +228,7 @@ export default async function LessonPage({
   params: Promise<{ lessonId: string }>;
 }) {
   const { lessonId } = await params;
-  const chosenLesson = [dummyLesson1, dummyLesson2].filter((lesson) => {
+  const chosenLesson = [mathLesson, englishLesson].filter((lesson) => {
     console.log(lesson.lessonId);
     if (lesson.lessonId != null) {
       return lessonId == lesson.lessonId;

@@ -8,7 +8,7 @@ import LessonCard from "./LessonCard";
 
 export default function LessonContent({ lesson }: { lesson: Lesson }) {
   const [currentSection, setCurrentSection] = useState(
-    lesson.lessonSections[0]
+    lesson.lessonSections[4]
   );
   return (
     <section className="w-3/7 m-auto flex flex-col gap-4">

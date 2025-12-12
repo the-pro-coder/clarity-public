@@ -17,7 +17,7 @@ export type LessonSection = {
   type: "practice" | "theory" | "creativity";
   title: string;
   exp: number;
-  content?: LessonSectionContent;
+  content: LessonSectionContent;
   status: "completed" | "not started" | "incorrect";
 };
 export type Lesson = {

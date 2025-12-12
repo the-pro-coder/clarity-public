@@ -1,14 +1,20 @@
 "use client";
 import { Card } from "@/components/ui/card";
 import { LessonSection } from "../../dashboard/LessonCardBig";
-import { Fragment } from "react/jsx-runtime";
-import { PauseIcon, PlayIcon, RotateCcw } from "lucide-react";
+import { LightbulbIcon, PauseIcon, PlayIcon, RotateCcw } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { useRef } from "react";
 import capitalize from "../../util/Capitalize";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Textarea } from "@/components/ui/textarea";
 
 type TheoryCardContent = {
   type: "theory";
@@ -29,6 +35,9 @@ type PracticeCardContent = {
 
 type CreativityCardContent = {
   type: "creativity";
+  instructions: string;
+  tips: string[];
+  minCharacters: number;
 };
 
 export type LessonSectionContent =
@@ -53,6 +62,9 @@ export default function LessonCard({
         )}
         {section.type == "practice" && content.type === "practice" && (
           <PracticeCard content={content} continueCallback={action} />
+        )}
+        {section.type == "creativity" && content.type === "creativity" && (
+          <CreativityCard content={content} continueCallback={action} />
         )}
       </div>
     </Card>
@@ -257,4 +269,136 @@ function PracticeCard({
   );
 }
 
-function CreativityCard() {}
+function CreativityCard({
+  content,
+  continueCallback,
+}: {
+  content: CreativityCardContent;
+  continueCallback: () => void;
+}) {
+  const [currentCharacters, setCurrentCharacters] = useState(0);
+  const [answerStatus, setAnswerStatus] = useState<
+    "correct" | "incorrect" | "idle"
+  >("idle");
+  const [explanation, setExplanation] = useState("");
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  function checkAnswer() {
+    if (answerStatus == "incorrect") {
+      setCurrentCharacters(0);
+      if (textAreaRef.current != undefined) {
+        textAreaRef.current.value = "";
+      }
+      setAnswerStatus("idle");
+      setExplanation("");
+    } else if (answerStatus == "correct") {
+      continueCallback();
+    }
+    // AI VALIDATION, add later please
+    else {
+      setAnswerStatus("correct");
+      setExplanation(
+        "Your answer is coherent, nuanced and shows pretty good thinking!"
+      );
+    }
+  }
+  return (
+    <div className="flex flex-col gap-5">
+      <section className="bg-orange-100 p-2 rounded-md border-2 border-orange-400">
+        <h2 className="text-2xl font-bold">{content.instructions}</h2>
+      </section>
+      <Collapsible>
+        <CollapsibleTrigger asChild>
+          <Button className="flex justify-start w-fit" variant={"ghost"}>
+            <LightbulbIcon />
+            <span className="text-secondary">Need some inspiration?</span>
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-1">
+          <ul className="ml-5 flex flex-col gap-2">
+            {content.tips.map((tip, i) => {
+              return (
+                <li className="text-secondary" key={i}>
+                  - {tip}
+                </li>
+              );
+            })}
+          </ul>
+        </CollapsibleContent>
+      </Collapsible>
+      <div className="flex flex-col gap-2">
+        <div className="justify-end flex text-sm">
+          <span
+            className={`${
+              currentCharacters >= content.minCharacters &&
+              answerStatus == "idle"
+                ? "text-orange-400"
+                : "hidden"
+            }`}
+          >
+            Ready to submit!
+          </span>
+        </div>
+        <Textarea
+          ref={textAreaRef}
+          disabled={answerStatus != "idle"}
+          onChange={(e) => {
+            e.target.value = e.target.value.trimStart();
+            setCurrentCharacters(e.target.value.trim().length);
+          }}
+          placeholder="Type your answer here"
+          className="resize-none text-lg min-h-40 max-h-40 bg-orange-100 border-2 border-orange-400 focus-visible:ring-0 focus-visible:border-orange-200 transition-colors md:text-base"
+        />
+        <div className="text-sm">
+          <span
+            className={`${
+              currentCharacters >= content.minCharacters
+                ? "text-orange-400"
+                : ""
+            }`}
+          >
+            {currentCharacters} characters
+            {currentCharacters < content.minCharacters && (
+              <span> (min {content.minCharacters})</span>
+            )}
+          </span>
+        </div>
+        <section
+          className={`flex flex-col p-2 rounded-md ${
+            answerStatus == "idle"
+              ? "hidden"
+              : answerStatus == "correct"
+              ? "bg-emerald-100 text-emerald-400"
+              : "bg-orange-100 text-orange-400"
+          }`}
+        >
+          {answerStatus == "correct" && (
+            <h3 className="text-xl font-bold">🎉 Great job!</h3>
+          )}
+          {answerStatus == "incorrect" && (
+            <h3 className="text-xl font-bold">
+              💡 Not quite, but you can learn from this!
+            </h3>
+          )}
+          <p className="text-foreground">{capitalize(explanation)}</p>
+        </section>
+        <div className="flex justify-end">
+          <Button
+            onClick={checkAnswer}
+            className={`${
+              answerStatus === "incorrect"
+                ? "bg-orange-400 hover:bg-orange-300"
+                : ""
+            }`}
+            disabled={currentCharacters < content.minCharacters}
+          >
+            {answerStatus == "idle"
+              ? "Check answer"
+              : answerStatus == "correct"
+              ? "Continue"
+              : "Retry"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
