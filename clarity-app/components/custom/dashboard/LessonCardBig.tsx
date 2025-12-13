@@ -8,7 +8,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Check, GraduationCap, Lightbulb, Sparkles } from "lucide-react";
+import {
+  Check,
+  GraduationCap,
+  Lightbulb,
+  Sparkles,
+  WandSparkles,
+} from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LessonSectionContent } from "../lessons/lesson/LessonCard";
@@ -111,6 +117,9 @@ export default function LessonCardBig({ data }: { data: Lesson }) {
                     )}
                     {lessonSection.type == "practice" && (
                       <Lightbulb className="inline mr-2" />
+                    )}
+                    {lessonSection.type == "creativity" && (
+                      <WandSparkles className="inline mr-2" />
                     )}
                     {lessonSection.title}
                     <Sparkles className="text-primary inline ml-2" />

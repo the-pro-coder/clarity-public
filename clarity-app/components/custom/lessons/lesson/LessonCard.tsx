@@ -15,6 +15,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Textarea } from "@/components/ui/textarea";
+import { useRouter } from "next/navigation";
 
 type TheoryCardContent = {
   type: "theory";
@@ -49,22 +50,36 @@ export default function LessonCard({
   section,
   content,
   action,
+  isLastSection,
 }: {
   section: LessonSection;
   content: LessonSectionContent;
+  isLastSection: boolean;
   action: () => void;
 }) {
   return (
     <Card className="w-full max-h-150 py-4">
       <div className="w-95/100 mx-auto">
         {section.type == "theory" && content.type === "theory" && (
-          <TheoryCard content={content} continueCallback={action} />
+          <TheoryCard
+            isLastSection={isLastSection}
+            content={content}
+            continueCallback={action}
+          />
         )}
         {section.type == "practice" && content.type === "practice" && (
-          <PracticeCard content={content} continueCallback={action} />
+          <PracticeCard
+            isLastSection={isLastSection}
+            content={content}
+            continueCallback={action}
+          />
         )}
         {section.type == "creativity" && content.type === "creativity" && (
-          <CreativityCard content={content} continueCallback={action} />
+          <CreativityCard
+            isLastSection={isLastSection}
+            content={content}
+            continueCallback={action}
+          />
         )}
       </div>
     </Card>
@@ -74,16 +89,19 @@ export default function LessonCard({
 function TheoryCard({
   content,
   playbackSpeed = 3,
+  isLastSection,
   continueCallback,
 }: {
   content: TheoryCardContent;
   playbackSpeed?: number;
+  isLastSection: boolean;
   continueCallback: () => void;
 }) {
   const [playbackState, setPlaybackState] = useState<
     "playing" | "paused" | "ended"
   >("playing");
   const [currentSentence, setCurrentSentence] = useState(0);
+  const router = useRouter();
   useEffect(() => {
     if (playbackState != "playing") return;
     const i = setInterval(() => {
@@ -162,12 +180,14 @@ function TheoryCard({
       <div className="flex mt-5 justify-end">
         <Button
           onClick={() => {
-            continueCallback();
-            setPlaybackState("playing");
+            if (!isLastSection) {
+              continueCallback();
+              setPlaybackState("playing");
+            } else router.replace("/dashboard");
           }}
           disabled={playbackState !== "ended"}
         >
-          Continue
+          {!isLastSection ? "Continue" : "Finish"}
         </Button>
       </div>
     </div>
@@ -177,18 +197,25 @@ function TheoryCard({
 function PracticeCard({
   content,
   continueCallback,
+  isLastSection,
 }: {
   content: PracticeCardContent;
+  isLastSection: boolean;
   continueCallback: () => void;
 }) {
   const id = useId();
   const [selectedAnswer, setSelectedAnswer] = useState<number>(-1);
+  const router = useRouter();
   const [answerStatus, setAnswerStatus] = useState<
     "correct" | "incorrect" | "idle"
   >("idle");
   function checkAnswer() {
     if (answerStatus == "correct") {
-      continueCallback();
+      if (isLastSection) {
+        router.replace("/dashboard");
+      } else {
+        continueCallback();
+      }
     }
     if (selectedAnswer == -1) return;
     if (answerStatus != "idle") {
@@ -220,11 +247,23 @@ function PracticeCard({
                   : answerStatus == "idle"
                   ? "hover:bg-accent"
                   : ""
+              } ${
+                selectedAnswer == i && answerStatus == "correct"
+                  ? "bg-emerald-100 border-emerald-400 "
+                  : ""
               }`}
               htmlFor={`${id}-${i}`}
             >
               <RadioGroupItem id={`${id}-${i}`} value={`${i}`} key={i} />
-              <span className="ml-1">{answer.text}</span>
+              <span
+                className={`ml-1 ${
+                  selectedAnswer == i && answerStatus == "correct"
+                    ? "text-emerald-400 "
+                    : ""
+                }`}
+              >
+                {answer.text}
+              </span>
             </Label>
           );
         })}
@@ -260,7 +299,9 @@ function PracticeCard({
         >
           {answerStatus != "idle"
             ? answerStatus == "correct"
-              ? "Continue"
+              ? !isLastSection
+                ? "Continue"
+                : "Finish"
               : "Retry"
             : "Check Answer"}
         </Button>
@@ -272,11 +313,14 @@ function PracticeCard({
 function CreativityCard({
   content,
   continueCallback,
+  isLastSection,
 }: {
   content: CreativityCardContent;
   continueCallback: () => void;
+  isLastSection: boolean;
 }) {
   const [currentCharacters, setCurrentCharacters] = useState(0);
+  const router = useRouter();
   const [answerStatus, setAnswerStatus] = useState<
     "correct" | "incorrect" | "idle"
   >("idle");
@@ -291,7 +335,11 @@ function CreativityCard({
       setAnswerStatus("idle");
       setExplanation("");
     } else if (answerStatus == "correct") {
-      continueCallback();
+      if (isLastSection) {
+        router.push("/dashboard");
+      } else {
+        continueCallback();
+      }
     }
     // AI VALIDATION, add later please
     else {
@@ -394,7 +442,9 @@ function CreativityCard({
             {answerStatus == "idle"
               ? "Check answer"
               : answerStatus == "correct"
-              ? "Continue"
+              ? isLastSection
+                ? "Finish"
+                : "Continue"
               : "Retry"}
           </Button>
         </div>

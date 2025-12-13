@@ -3,12 +3,12 @@
 import { Fragment } from "react/jsx-runtime";
 import LessonTopSection from "./LessonTopSection";
 import { useState } from "react";
-import { Lesson } from "../../dashboard/LessonCardBig";
+import { Lesson, LessonSection } from "../../dashboard/LessonCardBig";
 import LessonCard from "./LessonCard";
 
 export default function LessonContent({ lesson }: { lesson: Lesson }) {
   const [currentSection, setCurrentSection] = useState(
-    lesson.lessonSections[4]
+    lesson.lessonSections[0]
   );
   return (
     <section className="w-3/7 m-auto flex flex-col gap-4">
@@ -19,6 +19,10 @@ export default function LessonContent({ lesson }: { lesson: Lesson }) {
       <LessonCard
         section={currentSection}
         content={currentSection.content}
+        isLastSection={
+          lesson.lessonSections.indexOf(currentSection) ==
+          lesson.lessonSections.length - 1
+        }
         action={() => {
           setCurrentSection((prev) => {
             const currentSectionIndex = lesson.lessonSections.findIndex(
