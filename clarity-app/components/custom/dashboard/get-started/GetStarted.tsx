@@ -300,6 +300,7 @@ export default function GetStarted() {
           name,
           last_name: lastName,
           public_username: username,
+          current_lesson_ids: [],
           grade_level: grade || "",
           dedication_time: dedicationTime || "",
           interest_areas: interestAreas,

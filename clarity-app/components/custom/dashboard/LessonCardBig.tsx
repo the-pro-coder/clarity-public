@@ -18,42 +18,55 @@ import {
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LessonSectionContent } from "../lessons/lesson/LessonCard";
+import { GenerateLesson } from "@/app/dashboard/action";
+import capitalize from "../util/Capitalize";
 
 export type LessonSection = {
   type: "practice" | "theory" | "creativity";
   title: string;
   exp: number;
-  content: LessonSectionContent;
+  content?: LessonSectionContent;
+  section_id: string;
+  lesson_id: string;
   status: "completed" | "not started" | "incorrect";
 };
 export type Lesson = {
   subject: string;
-  approximateDuration: number;
+  approximate_duration: number;
   unit: number;
   topic: string;
   title: string;
   grade: string;
-  category: "theory & practice" | "analysis" | "hands-on practice";
+  category:
+    | "theory & practice"
+    | "analysis"
+    | "hands-on practice"
+    | "diagnostic";
   tags: string[];
   status: "not started" | "completed" | "in progress";
-  percentageCompleted: number;
-  expectedLearning: string;
-  lessonId: string;
-  lessonSections: LessonSection[];
+  percentage_completed: number;
+  expected_learning: string;
+  lesson_id: string;
+  user_id: string;
+  lesson_sections: LessonSection[];
 };
-export default function LessonCardBig({ data }: { data: Lesson }) {
+export default function LessonCardBig({ data }: { data?: Lesson }) {
+  const router = useRouter();
   const [collapsibleOpen, setCollapsibleOpen] = useState(false);
+
+  if (data == undefined) {
+    return;
+  }
   const {
     subject,
     unit,
     topic,
     title,
     status,
-    percentageCompleted,
-    expectedLearning,
-    lessonSections,
+    percentage_completed,
+    expected_learning,
+    lesson_sections,
   } = data;
-  const router = useRouter();
   return (
     <Card className="flex flex-col px-4 py-4 gap-4">
       <div className="flex gap-2 max-md:gap-1.5 flex-wrap">
@@ -61,19 +74,21 @@ export default function LessonCardBig({ data }: { data: Lesson }) {
           variant={"ghost"}
           className="text-lg self-center text-secondary max-md:text-sm rounded-full"
         >
-          {subject}
+          {capitalize(subject)}
         </Button>
-        <Tag className="max-md:text-sm max-sm:text-[clamp(2px, 10px)] max-md:w-fit max-md:text-nowrap max-md:px-2">
-          Unit {unit}
-        </Tag>
-        <Tag className="max-md:text-sm py-2">{topic}</Tag>
+        {unit != null && (
+          <Tag className="max-md:text-sm max-sm:text-[clamp(2px, 10px)] max-md:w-fit max-md:text-nowrap max-md:px-2">
+            Unit {unit}
+          </Tag>
+        )}
+        {topic != null && <Tag className="max-md:text-sm py-2">{topic}</Tag>}
       </div>
       <h2 className="text-3xl font-medium max-md:text-2xl">{title}</h2>
       <div className="flex items-center gap-2">
-        <Progress value={percentageCompleted} className="h-4 w-2/3" />
-        <span>{percentageCompleted}%</span>
+        <Progress value={percentage_completed} className="h-4 w-2/3" />
+        <span>{percentage_completed}%</span>
       </div>
-      <p className="text-lg max-md:text-base">You will {expectedLearning}</p>
+      <p className="text-lg max-md:text-base">You will {expected_learning}</p>
       <hr />
       <div className="flex justify-around">
         <Collapsible
@@ -98,14 +113,14 @@ export default function LessonCardBig({ data }: { data: Lesson }) {
               className="w-fit self-end text-lg max-md:px-4 max-md:text-sm my-2"
               size={"lg"}
               onClick={() => {
-                router.push(`lessons/${data.lessonId}`);
+                router.push(`lessons/${data.lesson_id}`);
               }}
             >
               {status == "not started" ? "Start" : "Continue"}
             </Button>
           </div>
           <CollapsibleContent className="mt-2">
-            {lessonSections.map((lessonSection, i) => {
+            {lesson_sections?.map((lessonSection, i) => {
               return (
                 <div
                   key={i}

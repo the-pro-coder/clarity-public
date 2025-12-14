@@ -8,7 +8,7 @@ import LessonCard from "./LessonCard";
 
 export default function LessonContent({ lesson }: { lesson: Lesson }) {
   const [currentSection, setCurrentSection] = useState(
-    lesson.lessonSections[0]
+    lesson.lesson_sections[0]
   );
   return (
     <section className="w-3/7 m-auto flex flex-col gap-4">
@@ -20,16 +20,16 @@ export default function LessonContent({ lesson }: { lesson: Lesson }) {
         section={currentSection}
         content={currentSection.content}
         isLastSection={
-          lesson.lessonSections.indexOf(currentSection) ==
-          lesson.lessonSections.length - 1
+          lesson.lesson_sections.indexOf(currentSection) ==
+          lesson.lesson_sections.length - 1
         }
         action={() => {
           setCurrentSection((prev) => {
-            const currentSectionIndex = lesson.lessonSections.findIndex(
+            const currentSectionIndex = lesson.lesson_sections.findIndex(
               (section) => section == currentSection
             );
-            if (currentSectionIndex + 1 < lesson.lessonSections.length) {
-              return lesson.lessonSections[currentSectionIndex + 1];
+            if (currentSectionIndex + 1 < lesson.lesson_sections.length) {
+              return lesson.lesson_sections[currentSectionIndex + 1];
             }
             return prev;
           });

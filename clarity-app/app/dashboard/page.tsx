@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
 import DashboardHeader from "@/components/custom/dashboard/DashboardHeader";
-import { Setup, GetRowFromTable } from "./action";
-import { Profile, Preferences, User } from "@/utils/supabase/tableTypes";
+import {
+  Setup,
+  GetRowFromTable,
+  GetLessons,
+  GenerateLesson,
+  InsertRowInTable,
+  GetSections,
+} from "./action";
+import { Profile, Preferences } from "@/utils/supabase/tableTypes";
 import { Flame } from "lucide-react";
 import NextLessonArea from "@/components/custom/dashboard/NextLessonArea";
 import ImprovementAreaSection from "@/components/custom/dashboard/ImprovementAreaSection";
@@ -826,6 +833,19 @@ export default async function Dashboard() {
     profile = await GetRowFromTable(`${user.user_id}`, "profiles");
     preferences = await GetRowFromTable(`${user.user_id}`, "preferences");
     const interestSubjects = profile.interest_areas;
+    let lessons = profile.current_lesson_ids
+      ? await GetLessons(user.user_id, profile.current_lesson_ids)
+      : "not created";
+    if (lessons == "not created") {
+      lessons = [];
+      for (const subject of interestSubjects) {
+        const lesson = await GenerateLesson(profile, subject, "diagnostic");
+        await InsertRowInTable(lesson, "lessons");
+        lessons.push(lesson);
+      }
+    } else if (!lessons) {
+      // error fetching lessons
+    }
     return (
       <main className="flex flex-col gap-10">
         <DashboardHeader name={profile.name} last_name={profile.last_name} />
@@ -862,7 +882,12 @@ export default async function Dashboard() {
               </h2>
             </section>
             <section className="flex flex-col">
-              <NextLessonArea interestSubjects={interestSubjects} />
+              {lessons && (
+                <NextLessonArea
+                  currentLessons={lessons}
+                  interestSubjects={interestSubjects}
+                />
+              )}
             </section>
           </div>
           <section className="flex-2">
