@@ -1,8 +1,8 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import capitalize from "../util/Capitalize";
-import { useEffect, useState } from "react";
-import LessonCardBig, { Lesson, LessonSection } from "./LessonCardBig";
+import { useState } from "react";
+import LessonCardBig, { Lesson } from "./LessonCardBig";
 
 // const mathLesson: Lesson = {
 //   subject: "Math",
@@ -234,7 +234,6 @@ export default function NextLessonArea({
   const lesson = currentLessons.find(
     (lesson) => lesson.subject == activeSubject
   );
-  // const dummyLesson = activeSubject == "math" ? mathLesson : englishLesson;
   return (
     <div className="flex flex-2 gap-3 flex-col">
       <div className="flex gap-3 max-md:gap-2">

@@ -235,9 +235,10 @@ export default async function LessonPage({
 }) {
   const { lessonId } = await params;
   const user_id = (await GetUser())?.id;
+  const profile = await GetRowFromTable(user_id || "", "profiles");
   let chosenLesson = await GetLesson(user_id || "", lessonId);
   if (!chosenLesson.lesson_sections[0].content) {
-    chosenLesson = await GenerateSections(chosenLesson);
+    chosenLesson = await GenerateSections(profile, chosenLesson);
   }
 
   return (

@@ -6,7 +6,7 @@ import {
   GetLessons,
   GenerateLesson,
   InsertRowInTable,
-  GetSections,
+  updateRowInTable,
 } from "./action";
 import { Profile, Preferences } from "@/utils/supabase/tableTypes";
 import { Flame } from "lucide-react";
@@ -23,6 +23,7 @@ import RecommendedContent, {
 } from "@/components/custom/dashboard/RecommendedContent";
 import InsightOfTheDaySection from "@/components/custom/dashboard/InsightOfTheDaySection";
 import { UserResponse } from "@supabase/supabase-js";
+import { Lesson } from "@/components/custom/dashboard/LessonCardBig";
 
 export const metadata: Metadata = {
   title: "Clarity - Dashboard",
@@ -843,6 +844,10 @@ export default async function Dashboard() {
         await InsertRowInTable(lesson, "lessons");
         lessons.push(lesson);
       }
+      profile.current_lesson_ids = lessons.map(
+        (lesson: Lesson) => lesson.lesson_id
+      );
+      await updateRowInTable(`${user.user_id}`, profile, "profiles");
     } else if (!lessons) {
       // error fetching lessons
     }

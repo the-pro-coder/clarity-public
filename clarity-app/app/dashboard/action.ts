@@ -95,7 +95,17 @@ export async function InsertRowInTable(dataToInsert: object, table: string) {
   const { data, error } = await supabase
     .from(`${capitalize(table)}`)
     .insert(dataToInsert);
-  console.log(error);
+}
+export async function updateRowInTable(
+  user_id: string,
+  dataToInsert: object,
+  table: string
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from(`${capitalize(table)}`)
+    .update(dataToInsert)
+    .eq("user_id", user_id);
 }
 
 export async function GetLesson(user_id: string, lesson_id: string) {
@@ -126,17 +136,20 @@ export async function UpdateLessonSections(
   const supabase = await createClient();
   await supabase
     .from(`Lessons`)
-    .update({ lesson_sections: new_lesson_sections })
+    .update({
+      lesson_sections: new_lesson_sections.lesson_sections,
+      approximate_duration: new_lesson_sections.approximate_duration,
+    })
     .eq("lesson_id", lesson_id);
 }
 
-export async function GenerateSections(lesson: Lesson) {
+export async function GenerateSections(profile: Profile, lesson: Lesson) {
   const model_instructions = `
   -Output must be valid JSON.
+  -The first character must be { and the last character must be }
   -Output must be a single JSON object.
   -Output must not include markdown, code fences, comments, or any other text.
-  - NEVER MENTION ANYTHING REGARDING ADHD.
-  -The first character must be { and the last character must be }.`;
+  -NEVER MENTION ANYTHING REGARDING ADHD.`;
 
   const model_prompt = `Generate lesson sections for the lesson that has ${JSON.stringify(
     lesson.lesson_sections
@@ -145,6 +158,11 @@ export async function GenerateSections(lesson: Lesson) {
   - Short but yet complete titles & descriptions.
 
   OUTPUT FORMAT (DEPENDING ON WHAT TYPE YOU CHOSE) (AVOID USING EXTRA CHARACTERS OTHERS THAN A READY TO PARSE OBJECT):
+  approximate_duration:number, (add an approximate duration number, in minutes, for the completion of the lesson based on the user ${JSON.stringify(
+    profile
+  )} and the number of sections, which is ${
+    lesson.lesson_sections.length
+  }, PLEASE BE ACCURATE AND DON'T GIVE ENORMOUS TIMES, estimate the time realistically with an aprox. 1-4 min. per section depending on difficulty, if it is more difficult then consider more time per section.)
   lesson_sections_content: (array of section contents)
   for theory type:
   {
@@ -167,13 +185,14 @@ export async function GenerateSections(lesson: Lesson) {
     instructions: string;
     tips (tips for crafting a good creative piece regarding the context): string[];
     minCharacters: number;
-  }`;
+  }
+  approximate_duration:number (add an approximate duration number, in minutes, for the completion of the lesson`;
 
   const sections_data_raw = await PromptModel(model_instructions, model_prompt);
-  console.log(`\x1b[35m${sections_data_raw.content}\x1b[0m`);
   const sections_content = JSON.parse(
     sections_data_raw.content?.substring(
-      sections_data_raw.content?.indexOf("{")
+      sections_data_raw.content?.indexOf("{"),
+      sections_data_raw.content?.lastIndexOf("}") + 1
     ) || ""
   );
   lesson.lesson_sections = lesson.lesson_sections.map((lesson_section, i) => {
@@ -183,7 +202,8 @@ export async function GenerateSections(lesson: Lesson) {
     };
     return section;
   });
-  UpdateLessonSections(lesson.lesson_id, lesson);
+  lesson.approximate_duration = sections_content["approximate_duration"];
+  await UpdateLessonSections(lesson.lesson_id, lesson);
   return lesson;
 }
 
@@ -246,10 +266,12 @@ export async function GenerateLesson(
   }`;
   }
   const lesson_data_raw = await PromptModel(model_instructions, model_prompt);
-  console.log(`\x1b[35m${lesson_data_raw.content}\x1b[0m`);
+
   const lesson_data = JSON.parse(
-    lesson_data_raw.content?.substring(lesson_data_raw.content?.indexOf("{")) ||
-      ""
+    lesson_data_raw.content?.substring(
+      lesson_data_raw.content?.indexOf("{"),
+      lesson_data_raw.content?.lastIndexOf("}") + 1
+    ) || ""
   );
   const lessonID = generateId("lesson");
   const lesson: Lesson = {

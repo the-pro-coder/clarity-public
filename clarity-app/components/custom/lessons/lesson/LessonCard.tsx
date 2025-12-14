@@ -53,10 +53,11 @@ export default function LessonCard({
   isLastSection,
 }: {
   section: LessonSection;
-  content: LessonSectionContent;
+  content?: LessonSectionContent;
   isLastSection: boolean;
   action: () => void;
 }) {
+  if (content == undefined) return;
   return (
     <Card className="w-full max-h-150 py-4">
       <div className="w-95/100 mx-auto">
