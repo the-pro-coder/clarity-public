@@ -54,7 +54,7 @@ export default function LessonCardBig({ data }: { data?: Lesson }) {
   const router = useRouter();
   const [collapsibleOpen, setCollapsibleOpen] = useState(false);
 
-  if (data == undefined) {
+  if (data == undefined || data.percentage_completed == 100) {
     return;
   }
   const {

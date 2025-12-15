@@ -293,12 +293,23 @@ export async function GenerateLesson(
   }`;
   }
   const lesson_data_raw = await PromptModel(model_instructions, model_prompt);
-  console.log(lesson_data_raw);
+  console.log(`\x1b[33m${JSON.stringify(lesson_data_raw.content)}\x1b[0m`);
+  console.log(
+    `\x1b[35m${lesson_data_raw.content
+      ?.substring(
+        lesson_data_raw.content?.indexOf("{"),
+        lesson_data_raw.content?.lastIndexOf("}") + 1
+      )
+      .replaceAll("\\", "")}\x1b[0m`
+  );
   const lesson_data = JSON.parse(
-    lesson_data_raw.content?.substring(
-      lesson_data_raw.content?.indexOf("{"),
-      lesson_data_raw.content?.lastIndexOf("}") + 1
-    ) || ""
+    lesson_data_raw.content
+      ?.substring(
+        lesson_data_raw.content?.indexOf("{") || 0,
+        lesson_data_raw.content?.lastIndexOf("}") + 1 ||
+          lesson_data_raw.content.length - 1
+      )
+      .replaceAll("\\", "") || ""
   );
   const lessonID = generateId("lesson");
   const lesson: Lesson = {

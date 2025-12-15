@@ -834,9 +834,10 @@ export default async function Dashboard() {
     profile = await GetRowFromTable(`${user.user_id}`, "profiles");
     preferences = await GetRowFromTable(`${user.user_id}`, "preferences");
     const interestSubjects = profile.interest_areas;
-    let lessons = profile.current_lesson_ids
-      ? await GetLessons(user.user_id, profile.current_lesson_ids)
-      : "not created";
+    let lessons =
+      profile.current_lesson_ids && profile.current_lesson_ids.length > 0
+        ? await GetLessons(user.user_id, profile.current_lesson_ids)
+        : "not created";
     if (lessons == "not created") {
       lessons = [];
       for (const subject of interestSubjects) {
@@ -854,8 +855,8 @@ export default async function Dashboard() {
       profile.current_lesson_ids = lessons
         .filter((lesson: Lesson) => lesson.status != "completed")
         .map((lesson: Lesson) => lesson.lesson_id);
-      if (profile.current_lesson_ids.length == 0) {
-        profile.current_lesson_ids = null;
+      if (profile.current_lesson_ids.length < 2) {
+        // generate other lessons.
       }
       await updateRowInTable(`${user.user_id}`, profile, "profiles");
     }
