@@ -850,6 +850,14 @@ export default async function Dashboard() {
       await updateRowInTable(`${user.user_id}`, profile, "profiles");
     } else if (!lessons) {
       // error fetching lessons
+    } else if (typeof lessons != "string") {
+      profile.current_lesson_ids = lessons
+        .filter((lesson: Lesson) => lesson.status != "completed")
+        .map((lesson: Lesson) => lesson.lesson_id);
+      if (profile.current_lesson_ids.length == 0) {
+        profile.current_lesson_ids = null;
+      }
+      await updateRowInTable(`${user.user_id}`, profile, "profiles");
     }
     return (
       <main className="flex flex-col gap-10">

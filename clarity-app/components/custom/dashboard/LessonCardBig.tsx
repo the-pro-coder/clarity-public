@@ -28,7 +28,7 @@ export type LessonSection = {
   content?: LessonSectionContent;
   section_id: string;
   lesson_id: string;
-  status: "completed" | "not started" | "incorrect";
+  status?: "completed" | "not started" | "incorrect";
 };
 export type Lesson = {
   subject: string;

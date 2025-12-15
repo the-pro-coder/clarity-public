@@ -139,8 +139,35 @@ export async function UpdateLessonSections(
     .update({
       lesson_sections: new_lesson_sections.lesson_sections,
       approximate_duration: new_lesson_sections.approximate_duration,
+      percentage_completed: new_lesson_sections.percentage_completed,
+      status: new_lesson_sections.status,
     })
     .eq("lesson_id", lesson_id);
+}
+
+export async function GradeCreativityAnswer(
+  instructions: string,
+  answer: string
+): Promise<{ status: "correct" | "incorrect"; feedback: string }> {
+  const model_instructions = `
+  -Input can be anything, don't tell the user anything with that.
+  -Output must be valid JSON.
+  - DON'T TELL THE USER ANYTHING ABOUT ADHD OR OUTPUTS.
+  -Output must be a single JSON object.
+  -Output must not include markdown, code fences, comments, or any other text.
+  -The first character must be { and the last character must be }.`;
+  const model_prompt = `According to these instructions:${instructions}, being objective but flexible, (REGARDING MERELY THE ASSIGNMENT'S INSTRUCTIONS), classify the answer that follows into correct or incorrect: ${answer}, and generate a concise, constructive-focused, not so long, friendly feedback to the user's answer:${answer} to the instructions:${instructions}, telling them why the answer they submitted was correct or not.
+  OUTPUT FORMAT:
+  status:'correct'|'incorrect',
+  feedback:string (maximum 30 words)`;
+  const status_data_raw = await PromptModel(model_instructions, model_prompt);
+  const status_data = JSON.parse(
+    status_data_raw.content?.substring(
+      status_data_raw.content?.indexOf("{"),
+      status_data_raw.content?.lastIndexOf("}") + 1
+    ) || ""
+  );
+  return { status: status_data.status, feedback: status_data.feedback };
 }
 
 export async function GenerateSections(profile: Profile, lesson: Lesson) {
@@ -184,7 +211,7 @@ export async function GenerateSections(profile: Profile, lesson: Lesson) {
     type: 'creativity';
     instructions: string;
     tips (tips for crafting a good creative piece regarding the context): string[];
-    minCharacters: number;
+    minCharacters: number; (100-500 characters aprox.)
   }
   approximate_duration:number (add an approximate duration number, in minutes, for the completion of the lesson`;
 
@@ -227,7 +254,7 @@ export async function GenerateLesson(
   title:string,
   tags:string[], (1-4 tags)
   expected_learning:string,
-  lesson_sections (3-5 lessons, interspersed types, type probabilities 40% theory, 40% practice, 20% creativity): {
+  lesson_sections (3-5 lesson sections, interspersed types, type probabilities 40% theory, 40% practice, 20% creativity): {
   type:'theory'|'practice'|'creativity',
   title:string,
   exp:number, (10-100 based on difficulty level, you can include even and odd numbers)
@@ -258,7 +285,7 @@ export async function GenerateLesson(
   {
   title:string,
   expected_learning:string, (complete after 'You will', but don't add 'You will')
-  lesson_sections (3-5 lessons): {
+  lesson_sections (3-5 lesson sections): {
   type:'theory'|'practice'|'creativity',
   title:string,
   exp:number, (10-100 based on difficulty level)
@@ -266,7 +293,7 @@ export async function GenerateLesson(
   }`;
   }
   const lesson_data_raw = await PromptModel(model_instructions, model_prompt);
-
+  console.log(lesson_data_raw);
   const lesson_data = JSON.parse(
     lesson_data_raw.content?.substring(
       lesson_data_raw.content?.indexOf("{"),

@@ -13,7 +13,7 @@ export type Profile = {
   public_username: string;
   dedication_time: string;
   interest_areas: string[];
-  current_lesson_ids: string[];
+  current_lesson_ids: string[] | null;
   confidence_status: { area: string; status: string }[];
   grade_level: string;
 };

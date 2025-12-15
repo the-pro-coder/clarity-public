@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
+import { GradeCreativityAnswer } from "@/app/dashboard/action";
 
 type TheoryCardContent = {
   type: "theory";
@@ -51,21 +52,24 @@ export default function LessonCard({
   content,
   action,
   isLastSection,
+  completedCallbackAction,
 }: {
   section: LessonSection;
   content?: LessonSectionContent;
   isLastSection: boolean;
   action: () => void;
+  completedCallbackAction: () => void;
 }) {
   if (content == undefined) return;
   return (
-    <Card className="w-full max-h-150 py-4">
+    <Card className="w-full max-h-fit py-4">
       <div className="w-95/100 mx-auto">
         {section.type == "theory" && content.type === "theory" && (
           <TheoryCard
             isLastSection={isLastSection}
             content={content}
             continueCallback={action}
+            completedCallbackAction={completedCallbackAction}
           />
         )}
         {section.type == "practice" && content.type === "practice" && (
@@ -73,6 +77,7 @@ export default function LessonCard({
             isLastSection={isLastSection}
             content={content}
             continueCallback={action}
+            completedCallbackAction={completedCallbackAction}
           />
         )}
         {section.type == "creativity" && content.type === "creativity" && (
@@ -80,6 +85,7 @@ export default function LessonCard({
             isLastSection={isLastSection}
             content={content}
             continueCallback={action}
+            completedCallbackAction={completedCallbackAction}
           />
         )}
       </div>
@@ -92,11 +98,13 @@ function TheoryCard({
   playbackSpeed = 3,
   isLastSection,
   continueCallback,
+  completedCallbackAction,
 }: {
   content: TheoryCardContent;
   playbackSpeed?: number;
   isLastSection: boolean;
   continueCallback: () => void;
+  completedCallbackAction: (value: "completed" | "incomplete") => void;
 }) {
   const [playbackState, setPlaybackState] = useState<
     "playing" | "paused" | "ended"
@@ -118,6 +126,7 @@ function TheoryCard({
     }, playbackSpeed * 1000);
     return () => clearInterval(i);
   }, [playbackSpeed, content.sentences.length, playbackState]);
+  if (playbackState === "ended") completedCallbackAction("completed");
   return (
     <div className="flex flex-col">
       {playbackState === "playing" && (
@@ -199,10 +208,12 @@ function PracticeCard({
   content,
   continueCallback,
   isLastSection,
+  completedCallbackAction,
 }: {
   content: PracticeCardContent;
   isLastSection: boolean;
   continueCallback: () => void;
+  completedCallbackAction: (value?: "completed" | "incomplete") => void;
 }) {
   const id = useId();
   const [selectedAnswer, setSelectedAnswer] = useState<number>(-1);
@@ -226,6 +237,7 @@ function PracticeCard({
     }
     const correct = content.answers[selectedAnswer].correct;
     setAnswerStatus(() => (correct ? "correct" : "incorrect"));
+    completedCallbackAction(correct ? "completed" : "incomplete");
   }
   return (
     <div className="flex flex-col gap-5">
@@ -315,10 +327,12 @@ function CreativityCard({
   content,
   continueCallback,
   isLastSection,
+  completedCallbackAction,
 }: {
   content: CreativityCardContent;
   continueCallback: () => void;
   isLastSection: boolean;
+  completedCallbackAction: (value: "completed" | "incorrect") => void;
 }) {
   const [currentCharacters, setCurrentCharacters] = useState(0);
   const router = useRouter();
@@ -344,10 +358,18 @@ function CreativityCard({
     }
     // AI VALIDATION, add later please
     else {
-      setAnswerStatus("correct");
-      setExplanation(
-        "Your answer is coherent, nuanced and shows pretty good thinking!"
-      );
+      if (!textAreaRef.current?.value) return;
+      GradeCreativityAnswer(
+        content.instructions,
+        textAreaRef.current.value
+      ).then((data) => {
+        const result = data;
+        setAnswerStatus(result.status);
+        setExplanation(result.feedback);
+        completedCallbackAction(
+          result.status == "correct" ? "completed" : "incorrect"
+        );
+      });
     }
   }
   return (
