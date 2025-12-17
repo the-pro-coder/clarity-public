@@ -1,15 +1,9 @@
 "use server";
-import {
-  Lesson,
-  LessonSection,
-  Topic,
-  Unit,
-} from "@/utils/supabase/tableTypes";
+import { Lesson, LessonSection, Topic } from "@/utils/supabase/tableTypes";
 import capitalize from "@/components/custom/util/Capitalize";
 import PromptModel from "@/components/custom/util/LLMIntegration";
 import { createClient } from "@/utils/supabase/server";
 import { User, Preferences, Profile } from "@/utils/supabase/tableTypes";
-import { UserResponse } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 async function alreadyInsertedRow(
   table: string,
@@ -262,16 +256,46 @@ export async function GradeCreativityAnswer(
   answer: string
 ): Promise<{ status: "correct" | "incorrect"; feedback: string }> {
   const model_instructions = `
-  -Input can be anything, don't tell the user anything with that.
-  -Output must be valid JSON.
-  - DON'T TELL THE USER ANYTHING ABOUT ADHD OR OUTPUTS.
-  -Output must be a single JSON object.
-  -Output must not include markdown, code fences, comments, or any other text.
-  -The first character must be { and the last character must be }.`;
-  const model_prompt = `According to these instructions:${instructions}, being objective but flexible, (REGARDING MERELY THE ASSIGNMENT'S INSTRUCTIONS), classify the answer that follows into correct or incorrect: ${answer}, and generate a concise, constructive-focused, not so long, friendly feedback to the user's answer:${answer} to the instructions:${instructions}, telling them why the answer they submitted was correct or not.
-  OUTPUT FORMAT:
-  status:'correct'|'incorrect',
-  feedback:string (maximum 30 words)`;
+You are a JSON-only function.
+
+Rules (must follow):
+- Return ONLY a single valid JSON object.
+- No markdown, no code fences, no comments, no explanations, no extra text.
+- The first character MUST be "{" and the last character MUST be "}".
+- Use double quotes for all JSON keys and string values.
+- Output MUST match the exact schema provided and MUST NOT include extra keys.
+- Do NOT mention ADHD, the system, the rules, or the output format.
+- If you are unsure, still output a best-effort JSON that matches the schema.
+`;
+
+  const model_prompt = `
+Task:
+Evaluate the student's answer against the assignment instructions. Classify as correct or incorrect and provide concise, constructive feedback.
+
+Assignment instructions:
+${instructions}
+
+Student answer:
+${answer}
+
+Required JSON schema (output EXACTLY this shape, no extra properties):
+{
+  "status": "correct" | "incorrect",
+  "feedback": "string"
+}
+
+Constraints:
+- feedback must be <= 30 words
+- feedback must be friendly and constructive
+- feedback must explain why it is correct/incorrect
+
+Self-check before final output (do this silently):
+- Is the output valid JSON?
+- Is it a single object with only "status" and "feedback"?
+- Is "status" exactly "correct" or "incorrect"?
+- Is feedback <= 30 words?
+If anything fails, fix it and output only the corrected JSON object.
+`;
   const status_data_raw = await PromptModel(model_instructions, model_prompt);
   const status_data = JSON.parse(
     status_data_raw.content?.substring(
@@ -284,48 +308,83 @@ export async function GradeCreativityAnswer(
 
 export async function GenerateSections(profile: Profile, lesson: Lesson) {
   const model_instructions = `
-  -Output must be valid JSON.
-  -The first character must be { and the last character must be }
-  -Output must be a single JSON object.
-  -Output must not include markdown, code fences, comments, or any other text.
-  -NEVER MENTION ANYTHING REGARDING ADHD.`;
+You are a JSON-only generator.
 
-  const model_prompt = `Generate lesson sections for the lesson that has ${JSON.stringify(
-    lesson.lesson_sections
-  )}:
-  - Adapted to the ADHD suffering user's needs & likes.
-  - Short but yet complete titles & descriptions.
+Rules:
+- Return ONLY a single valid JSON object.
+- No markdown, no code fences, no comments, no extra text.
+- The first character must be "{" and the last character must be "}".
+- Use double quotes for all JSON keys and all string values.
+- Never mention ADHD or any user condition.
+- Output must match the schema exactly and must not include extra keys.
+`;
 
-  OUTPUT FORMAT (DEPENDING ON WHAT TYPE YOU CHOSE) (AVOID USING EXTRA CHARACTERS OTHERS THAN A READY TO PARSE OBJECT):
-  approximate_duration:number, (add an approximate duration number, in minutes, for the completion of the lesson based on the user ${JSON.stringify(
-    profile
-  )} and the number of sections, which is ${
-    lesson.lesson_sections.length
-  }, PLEASE BE ACCURATE AND DON'T GIVE ENORMOUS TIMES, estimate the time realistically with an aprox. 1-4 min. per section depending on difficulty, if it is more difficult then consider more time per section.)
-  lesson_sections_content: (array of section contents)
-  for theory type:
-  {
-    type:'theory'
-    sentences:string[],
-  }
-  for practice type:
-  {
-    type: 'practice',
-    question: string,
-    explanation: string,
-    answers (4-6 possible answers): {
-    text:string,
-    correct:boolean,
-    }[];
-  }
-  for creativity type:
-  {
-    type: 'creativity';
-    instructions: string;
-    tips (tips for crafting a good creative piece regarding the context): string[];
-    minCharacters: number; (100-500 characters aprox.)
-  }
-  approximate_duration:number (add an approximate duration number, in minutes, for the completion of the lesson`;
+  const model_prompt = `
+Task:
+Generate the content for each lesson section in the input lesson.sections list.
+Do NOT add, remove, reorder, or rename sections.
+Each output item must follow the correct shape for its "type".
+
+Input lesson sections (JSON):
+${JSON.stringify(lesson.lesson_sections)}
+
+User profile (JSON):
+${JSON.stringify(profile)}
+
+Output schema (MUST match exactly; no extra properties):
+{
+  "approxDurationMinutes": 0,
+  "lessonSectionsContent": [
+    {
+      "type": "theory",
+      "sentences": [""]
+    },
+    {
+      "type": "practice",
+      "question": "",
+      "explanation": "",
+      "answers": [
+        { "text": "", "correct": false }
+      ]
+    },
+    {
+      "type": "creativity",
+      "instructions": "",
+      "tips": [""],
+      "minCharacters": 50
+    }
+  ]
+}
+
+Hard rules:
+- lessonSectionsContent.length MUST equal ${lesson.lesson_sections.length}.
+- For each index i:
+  - lessonSectionsContent[i].type MUST equal the input section's type at index i.
+  - The object MUST include only the fields allowed for that type (no extra keys).
+
+Per-type requirements:
+- theory:
+  - "sentences" must contain 3-8 short, clear sentences.
+- practice:
+  - "answers" must contain 4-6 options.
+  - Exactly 1 answer must have "correct": true.
+  - "explanation" must justify why that option is correct.
+- creativity:
+  - "tips" must contain 3-6 tips.
+  - "minCharacters" must be between 50 and 500.
+
+Time requirement:
+- approxDurationMinutes must be a realistic total estimate based on section count and difficulty.
+- Use roughly 1-4 minutes per section (harder sections → higher within that range).
+- Do not output extreme times.
+
+Silent self-check before output:
+- Valid JSON? Single object?
+- Only top-level keys: "approxDurationMinutes" and "lessonSectionsContent"?
+- Length matches input and types match by index?
+- Each item matches its type schema and constraints?
+Fix silently and output ONLY the final JSON object.
+`;
 
   const sections_data_raw = await PromptModel(model_instructions, model_prompt);
   const sections_content = JSON.parse(
@@ -337,11 +396,11 @@ export async function GenerateSections(profile: Profile, lesson: Lesson) {
   lesson.lesson_sections = lesson.lesson_sections.map((lesson_section, i) => {
     const section = {
       ...lesson_section,
-      content: sections_content["lesson_sections_content"][i],
+      content: sections_content["lessonSectionsContent"][i],
     };
     return section;
   });
-  lesson.approximate_duration = sections_content["approximate_duration"];
+  lesson.approximate_duration = sections_content["approxDurationMinutes"];
   await UpdateLessonSections(lesson.lesson_id, lesson);
   return lesson;
 }
@@ -352,58 +411,127 @@ export async function GenerateLesson(
   type: "diagnostic" | "default"
 ) {
   let model_instructions = `
-  -Output must be valid JSON.
-  -Output must be a single JSON object.
-  -Output must not include markdown, code fences, comments, or any other text.
-  -The first character must be { and the last character must be }.`;
-  let model_prompt = `Generate a lesson with these specifications:
-  - Adapted to the ADHD suffering user's needs & likes.
-  - Short but yet complete titles & descriptions.
+You are a JSON-only generator.
 
-  OUTPUT FORMAT (AVOID USING EXTRA CHARACTERS OTHERS THAN A READY TO PARSE OBJECT): {
-  unit:string,
-  topic:string,
-  title:string,
-  tags:string[], (1-4 tags)
-  expected_learning:string,
-  lesson_sections (3-5 lesson sections, interspersed types, type probabilities 40% theory, 40% practice, 20% creativity): {
-  type:'theory'|'practice'|'creativity',
-  title:string,
-  exp:number, (10-100 based on difficulty level, you can include even and odd numbers)
-  }[]
-  }`;
+Rules:
+- Return ONLY a single valid JSON object.
+- No markdown, code fences, comments, or extra text.
+- The first character must be "{" and the last character must be "}".
+- Use double quotes for all keys and string values.
+- Output must match the schema exactly and must not include extra keys.
+- Do not mention any medical conditions or diagnoses.
+`;
 
-  if (type == "diagnostic") {
-    model_instructions = `Mentor for a student suffering from ADHD, think of the best diagnosis suited type of lesson for ${subject} for this student profile:
-    student name:${profile.name}
-    grade level (high-school):${profile.grade_level}
-    confidence status: ${profile.confidence_status.filter(
-      (status) => status.area == subject
-    )}
-    for output, follow:
-    -Output must be valid JSON.
-    - NEVER MENTION ADHD.
-    - For diagnostics, just set the title to "$subject diagnostic".
-    -Text shouldn't be too large.
-    -Output must be a single JSON object.
-    -Output must not include markdown, <s> tags, code fences, comments, or any other text.
-    -The first character must be { and the last character must be }.
-    `;
+  let model_prompt = `
+Task:
+Generate ONE lesson for subject: "${subject}".
 
-    model_prompt = `Generate a lesson with these specifications:
-  - Adapted to the ADHD suffering user's needs & likes.
-  - Short but yet complete titles & descriptions.
-  OUTPUT FORMAT (AVOID USING EXTRA CHARACTERS OTHERS THAN A READY TO PARSE OBJECT):
-  {
-  title:string,
-  expected_learning:string, (complete after 'You will', but don't add 'You will')
-  lesson_sections (3-5 lesson sections): {
-  type:'theory'|'practice'|'creativity',
-  title:string,
-  exp:number, (10-100 based on difficulty level)
-  }[]
-  }`;
+Student profile (JSON):
+${JSON.stringify(profile)}
+
+Lesson requirements:
+- Short but complete titles and descriptions.
+- Create 3 to 5 lesson sections.
+- Choose section types deliberately for completeness (intro → practice → reinforcement).
+- Distribution is a soft target, but MUST satisfy these hard constraints:
+  - At least 1 "practice" section.
+  - At least 1 "creativity" section. (required)
+  - "theory" is optional.
+- If lesson_sections length is 3: include exactly 1 creativity + at least 1 practice.
+- If length is 4-5: include 1-2 creativity and 1-3 practice (rest theory if needed).
+- Keep difficulty reasonable; steps should be clear and doable.
+- Prefer 4 or 5 lesson sections when the content reasonably allows it.
+- Use only 3 sections if the lesson would become repetitive or bloated with more.
+- Across the generated lessons, avoid always using the same section count.
+
+Output schema (EXACT, no extra properties):
+{
+  "unit": "",
+  "topic": "",
+  "title": "",
+  "tags": [""],
+  "expected_learning": "",
+  "lesson_sections": [
+    { "type": "theory", "title": "", "exp": 10 }
+  ]
+}
+
+Constraints:
+- tags: 1 to 4 items.
+- lesson_sections: 3 to 5 items.
+- type: one of "theory", "practice", "creativity".
+- exp: integer 10 to 100 (reflect difficulty).
+- Section titles: 2-7 words, specific and action-oriented.
+
+Silent self-check before output:
+- Valid JSON? One object only?
+- Only allowed keys?
+- tags count 1-4?
+- lesson_sections count 3-5?
+- Contains at least 1 practice AND at least 1 creativity?
+- type values valid and exp integers valid?
+Fix silently and output only the corrected JSON.
+`;
+
+  if (type === "diagnostic") {
+    model_instructions = `
+You are a JSON-only generator.
+
+Rules:
+- Return ONLY a single valid JSON object.
+- No markdown, code fences, comments, or extra text.
+- The first character must be "{" and the last character must be "}".
+- Use double quotes for all keys and string values.
+- Output must match the schema exactly and must not include extra keys.
+- Do not mention any medical conditions or diagnoses.
+`;
+    model_prompt = `
+Task:
+Generate ONE diagnostic lesson for subject: "${subject}".
+Goal: collect diagnostic signal (confidence, misconceptions, pacing) while staying easy and low-pressure.
+
+Student profile (JSON):
+${JSON.stringify(profile)}
+
+Confidence status related to this subject (JSON):
+${JSON.stringify(
+  profile.confidence_status?.filter((s) => s.area === subject) ?? []
+)}
+
+Output schema (EXACT, no extra properties):
+{
+  "title": "${subject} Diagnostic",
+  "expected_learning": "",
+  "lesson_sections": [
+    { "type": "practice", "title": "", "exp": 10 }
+  ]
+}
+
+Diagnostic hard constraints:
+- title MUST be exactly "${subject} Diagnostic".
+- expected_learning must complete after "You will" BUT do not include the words "You will".
+- lesson_sections MUST be 8 to 10 items.
+- Allowed section types: ONLY "practice" and "creativity". (theory is forbidden)
+- Include BOTH types:
+  - practice count: 5-7
+  - creativity count: 2-4
+- Keep difficulty low: exp should usually be 10-35.
+- Section titles should hint at the diagnostic signal:
+  - practice titles should target a specific micro-skill or common misconception.
+  - creativity titles should ask for explanation/strategy in the student's own words.
+
+Silent self-check before output:
+- Valid JSON? One object only?
+- title exactly "${subject} Diagnostic"?
+- expected_learning does NOT include "You will"?
+- lesson_sections count 8-10?
+- Contains only "practice" and "creativity" types?
+- practice count 5-7 and creativity count 2-4?
+- exp integers 10-100 (prefer 10-35)?
+Fix silently and output only the JSON object.
+`;
   }
+
   const lesson_data_raw = await PromptModel(model_instructions, model_prompt);
   const lesson_data = JSON.parse(
     lesson_data_raw.content
@@ -424,7 +552,7 @@ export async function GenerateLesson(
     title: lesson_data["title"],
     grade: profile.grade_level,
     tags: lesson_data["tags"] || [],
-    category: "diagnostic",
+    category: type,
     percentage_completed: 0,
     status: "not started",
     expected_learning: lesson_data["expected_learning"].toLowerCase(),
@@ -457,27 +585,92 @@ export async function GenerateLessons(
   }
 ) {
   const model_instructions = `
-  -Output must be valid JSON.
-  -Output must be a single JSON object.
-  -Output must not include markdown, code fences, comments, or any other text.
-  -The first character must be { and the last character must be }.`;
-  const model_prompt = `Generate lessons for the subject of ${subject} for this profile:${JSON.stringify(
-    profile
-  )} for this specific topic:${JSON.stringify(topic)} with these specifications:
-  - Adapted to the ADHD suffering user's needs & likes.
-  - Short but yet complete titles & descriptions.
+You are a JSON-only generator.
 
-  OUTPUT FORMAT (AVOID USING EXTRA CHARACTERS OTHERS THAN A READY TO PARSE OBJECT): {
-  lessons: {
-  title:string,
-  tags:string[], (1-4 tags)
-  expected_learning:string,
-  lesson_sections (3-5 lesson sections, interspersed types, type probabilities 40% theory, 40% practice, 20% creativity): {
-  type:'theory'|'practice'|'creativity',
-  title:string,
-  exp:number, (10-100 based on difficulty level, you can include even and odd numbers)
-}[] }[] (5-7 lessons)
-  }`;
+Rules:
+- Return ONLY a single valid JSON object.
+- No markdown, code fences, comments, or extra text.
+- The first character must be "{" and the last character must be "}".
+- Use double quotes for all keys and string values.
+- Output must match the schema exactly and must not include extra keys.
+- Do not mention any medical conditions or diagnoses.
+`;
+
+  const model_prompt = `
+Task:
+Generate 5 to 7 lessons for subject: "${subject}" focused on the given topic.
+
+Student profile (JSON):
+${JSON.stringify(profile)}
+
+Topic (JSON):
+${JSON.stringify(topic)}
+
+Lesson requirements:
+- Titles and expected_learning must be short but complete.
+- Each lesson must be meaningfully different (different sub-skill, angle, or progression step).
+- Each lesson must have 3 to 5 lesson sections.
+- Section types must be chosen deliberately for completeness (intro → practice → reinforcement).
+- Distribution is a soft target, but MUST satisfy these hard constraints PER LESSON:
+  - At least 1 "practice" section.
+  - At least 1 "creativity" section. (required)
+  - "theory" is optional.
+- If a lesson has 3 sections: include exactly 1 creativity + at least 1 practice.
+- If a lesson has 4-5 sections: include 1-2 creativity and 1-3 practice (rest may be theory).
+- Prefer 4 or 5 lesson sections when the content reasonably allows it.
+- Use only 3 sections if the lesson would become repetitive or bloated with more.
+- Across the generated lessons, avoid always using the same section count.
+
+Across the full set of lessons:
+- At least 2 lessons must have 4 sections.
+- At least 1 lesson must have 5 sections.
+- No more than 2 lessons may have only 3 sections.
+
+Output schema (EXACT, no extra properties):
+{
+  "lessons": [
+    {
+      "title": "",
+      "tags": [""],
+      "expected_learning": "",
+      "lesson_sections": [
+        { "type": "theory", "title": "", "exp": 10 }
+      ]
+    }
+  ]
+}
+
+Constraints:
+- lessons: 5 to 7 items.
+- tags: 1 to 4 items.
+- lesson_sections: 3 to 5 items.
+- type must be one of: "theory", "practice", "creativity".
+- exp must be an integer 10 to 100.
+
+Quality rules:
+- Section titles: 2-7 words, concrete and action-oriented.
+- exp should reflect difficulty (earlier lessons lower, later lessons higher).
+- Avoid repeating the same lesson title or identical section patterns across lessons.
+
+Silent self-check before output:
+- Valid JSON and single object?
+- Only top-level key "lessons"?
+- lessons length 5-7?
+- For each lesson:
+  - tags 1-4?
+  - sections 3-5?
+  - contains at least 1 practice AND at least 1 creativity?
+  - types valid and exp valid integer 10-100?
+- No extra keys anywhere?
+Fix silently and output only the JSON object.
+Section count control:
+- Each lesson must have 3 to 5 sections.
+- Prefer 4 or 5 sections for most lessons.
+- Use 3 sections ONLY when the lesson focuses on a single narrow skill.
+- Across all lessons, avoid repeating the same section count for every lesson.
+- Are section counts varied across lessons (not all equal)?
+`;
+
   const lessons_data_raw = await PromptModel(model_instructions, model_prompt);
   const lessons_data = JSON.parse(
     lessons_data_raw.content

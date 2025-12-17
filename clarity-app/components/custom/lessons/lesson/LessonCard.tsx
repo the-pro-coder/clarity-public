@@ -366,6 +366,10 @@ function CreativityCard({
       if (isLastSection) {
         onFinishedCallback();
       } else {
+        if (textAreaRef.current != undefined) {
+          textAreaRef.current.value = "";
+        }
+        setAnswerStatus("idle");
         continueCallback();
       }
     }

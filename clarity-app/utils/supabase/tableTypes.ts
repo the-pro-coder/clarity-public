@@ -68,6 +68,7 @@ export type Lesson = {
   grade: string;
   category:
     | "theory & practice"
+    | "default"
     | "analysis"
     | "hands-on practice"
     | "diagnostic";

@@ -53,7 +53,9 @@ export default function LessonCardBig({ data }: { data?: Lesson }) {
         )}
         {topic != null && <Tag className="max-md:text-sm py-2">{topic}</Tag>}
       </div>
-      <h2 className="text-3xl font-medium max-md:text-2xl">{title}</h2>
+      <h2 className="text-3xl font-medium max-md:text-2xl">
+        {capitalize(title)}
+      </h2>
       <div className="flex items-center gap-2">
         <Progress value={percentage_completed} className="h-4 w-2/3" />
         <span>{percentage_completed}%</span>
