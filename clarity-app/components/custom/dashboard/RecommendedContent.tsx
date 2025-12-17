@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import Autoplay from "embla-carousel-autoplay";
 import { useEffect, useState } from "react";
 import capitalize from "../util/Capitalize";
-import { Lesson } from "./LessonCardBig";
 import {
   Carousel,
   CarouselApi,
@@ -21,26 +20,7 @@ import {
   CollapsibleTrigger,
 } from "@radix-ui/react-collapsible";
 import { BicepsFlexed, BookIcon, EyeIcon } from "lucide-react";
-
-export type Topic = {
-  title: string;
-  tags: string[];
-  subject: string;
-  grade: string;
-  description: string;
-  content: Lesson[];
-};
-
-export type Unit = {
-  title: string;
-  number?: number;
-  subject: string;
-  tags: string[];
-  grade: string;
-  description: string;
-  imageURL?: string;
-  content: Topic[];
-};
+import { Unit, Lesson } from "@/utils/supabase/tableTypes";
 
 export default function RecommendedContent({
   interestSubjects,
@@ -133,7 +113,7 @@ export default function RecommendedContent({
                       <div className="flex gap-3 items-start">
                         <Image
                           src={
-                            suggestedUnit.imageURL ||
+                            suggestedUnit.image_url ||
                             `/dashboard/recommended-units/default ${i + 1}.png`
                           }
                           alt="Unit Image"
@@ -143,7 +123,7 @@ export default function RecommendedContent({
                         />
                         <Image
                           src={
-                            suggestedUnit.imageURL ||
+                            suggestedUnit.image_url ||
                             `/dashboard/recommended-units/default ${i + 1}.png`
                           }
                           alt="Unit Image"

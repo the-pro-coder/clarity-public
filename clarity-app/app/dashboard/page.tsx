@@ -18,12 +18,10 @@ import ExploreTopics from "@/components/custom/dashboard/ExploreTopicsSection";
 import AITutorSection from "@/components/custom/dashboard/AITutorSection";
 import ProgressFeedbackSection from "@/components/custom/dashboard/ProgressFeedbackSection";
 
-import RecommendedContent, {
-  Unit,
-} from "@/components/custom/dashboard/RecommendedContent";
+import RecommendedContent from "@/components/custom/dashboard/RecommendedContent";
 import InsightOfTheDaySection from "@/components/custom/dashboard/InsightOfTheDaySection";
 import { UserResponse } from "@supabase/supabase-js";
-import { Lesson } from "@/components/custom/dashboard/LessonCardBig";
+import { Unit, Lesson } from "@/utils/supabase/tableTypes";
 
 export const metadata: Metadata = {
   title: "Clarity - Dashboard",

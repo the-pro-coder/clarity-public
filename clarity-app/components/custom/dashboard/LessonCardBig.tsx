@@ -17,39 +17,9 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LessonSectionContent } from "../lessons/lesson/LessonCard";
-import { GenerateLesson } from "@/app/dashboard/action";
 import capitalize from "../util/Capitalize";
+import { Lesson } from "@/utils/supabase/tableTypes";
 
-export type LessonSection = {
-  type: "practice" | "theory" | "creativity";
-  title: string;
-  exp: number;
-  content?: LessonSectionContent;
-  section_id: string;
-  lesson_id: string;
-  status?: "completed" | "not started" | "incorrect";
-};
-export type Lesson = {
-  subject: string;
-  approximate_duration: number;
-  unit: number;
-  topic: string;
-  title: string;
-  grade: string;
-  category:
-    | "theory & practice"
-    | "analysis"
-    | "hands-on practice"
-    | "diagnostic";
-  tags: string[];
-  status: "not started" | "completed" | "in progress";
-  percentage_completed: number;
-  expected_learning: string;
-  lesson_id: string;
-  user_id: string;
-  lesson_sections: LessonSection[];
-};
 export default function LessonCardBig({ data }: { data?: Lesson }) {
   const router = useRouter();
   const [collapsibleOpen, setCollapsibleOpen] = useState(false);

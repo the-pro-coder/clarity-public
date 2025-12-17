@@ -1,6 +1,6 @@
 "use client";
 import { Card } from "@/components/ui/card";
-import { LessonSection } from "../../dashboard/LessonCardBig";
+import { LessonSection } from "@/utils/supabase/tableTypes";
 import { LightbulbIcon, PauseIcon, PlayIcon, RotateCcw } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
-import { GradeCreativityAnswer } from "@/app/dashboard/action";
+import { GenerateRoadmap, GradeCreativityAnswer } from "@/app/dashboard/action";
 
 type TheoryCardContent = {
   type: "theory";
@@ -53,12 +53,14 @@ export default function LessonCard({
   action,
   isLastSection,
   completedCallbackAction,
+  onCompletedCallbackAction,
 }: {
   section: LessonSection;
   content?: LessonSectionContent;
   isLastSection: boolean;
   action: () => void;
   completedCallbackAction: () => void;
+  onCompletedCallbackAction: () => void;
 }) {
   if (content == undefined) return;
   return (
@@ -66,6 +68,7 @@ export default function LessonCard({
       <div className="w-95/100 mx-auto">
         {section.type == "theory" && content.type === "theory" && (
           <TheoryCard
+            onFinishedCallback={onCompletedCallbackAction}
             isLastSection={isLastSection}
             content={content}
             continueCallback={action}
@@ -74,6 +77,7 @@ export default function LessonCard({
         )}
         {section.type == "practice" && content.type === "practice" && (
           <PracticeCard
+            onFinishedCallback={onCompletedCallbackAction}
             isLastSection={isLastSection}
             content={content}
             continueCallback={action}
@@ -82,6 +86,7 @@ export default function LessonCard({
         )}
         {section.type == "creativity" && content.type === "creativity" && (
           <CreativityCard
+            onFinishedCallback={onCompletedCallbackAction}
             isLastSection={isLastSection}
             content={content}
             continueCallback={action}
@@ -99,12 +104,14 @@ function TheoryCard({
   isLastSection,
   continueCallback,
   completedCallbackAction,
+  onFinishedCallback,
 }: {
   content: TheoryCardContent;
   playbackSpeed?: number;
   isLastSection: boolean;
   continueCallback: () => void;
   completedCallbackAction: (value: "completed" | "incomplete") => void;
+  onFinishedCallback: () => void;
 }) {
   const [playbackState, setPlaybackState] = useState<
     "playing" | "paused" | "ended"
@@ -193,7 +200,9 @@ function TheoryCard({
             if (!isLastSection) {
               continueCallback();
               setPlaybackState("playing");
-            } else router.replace("/dashboard");
+            } else {
+              onFinishedCallback();
+            }
           }}
           disabled={playbackState !== "ended"}
         >
@@ -209,11 +218,13 @@ function PracticeCard({
   continueCallback,
   isLastSection,
   completedCallbackAction,
+  onFinishedCallback,
 }: {
   content: PracticeCardContent;
   isLastSection: boolean;
   continueCallback: () => void;
   completedCallbackAction: (value?: "completed" | "incomplete") => void;
+  onFinishedCallback: () => void;
 }) {
   const id = useId();
   const [selectedAnswer, setSelectedAnswer] = useState<number>(-1);
@@ -224,7 +235,7 @@ function PracticeCard({
   function checkAnswer() {
     if (answerStatus == "correct") {
       if (isLastSection) {
-        router.replace("/dashboard");
+        onFinishedCallback();
       } else {
         continueCallback();
       }
@@ -328,11 +339,13 @@ function CreativityCard({
   continueCallback,
   isLastSection,
   completedCallbackAction,
+  onFinishedCallback,
 }: {
   content: CreativityCardContent;
   continueCallback: () => void;
   isLastSection: boolean;
   completedCallbackAction: (value: "completed" | "incorrect") => void;
+  onFinishedCallback: () => void;
 }) {
   const [currentCharacters, setCurrentCharacters] = useState(0);
   const router = useRouter();
@@ -351,7 +364,7 @@ function CreativityCard({
       setExplanation("");
     } else if (answerStatus == "correct") {
       if (isLastSection) {
-        router.push("/dashboard");
+        onFinishedCallback();
       } else {
         continueCallback();
       }

@@ -2,7 +2,9 @@
 import {
   Lesson,
   LessonSection,
-} from "@/components/custom/dashboard/LessonCardBig";
+  Topic,
+  Unit,
+} from "@/utils/supabase/tableTypes";
 import capitalize from "@/components/custom/util/Capitalize";
 import PromptModel from "@/components/custom/util/LLMIntegration";
 import { createClient } from "@/utils/supabase/server";
@@ -81,13 +83,37 @@ export async function GetUser() {
   return user;
 }
 
-export async function GetRowFromTable(user_id: string, table: string) {
+export async function GetTopic(user_id: string, lesson_id: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from(`${capitalize(table)}`)
+    .from("Topics")
     .select("*")
-    .eq("user_id", user_id);
+    .eq("user_id", user_id)
+    .contains("lesson_ids", [lesson_id]);
   if (!error) return data[0];
+}
+
+export async function GetRowFromTable(
+  user_id: string,
+  table: string,
+  identifier?: string,
+  identifierKey?: string
+) {
+  const supabase = await createClient();
+  if (identifier && identifierKey) {
+    const { data, error } = await supabase
+      .from(`${capitalize(table)}`)
+      .select("*")
+      .eq(identifierKey, identifier)
+      .eq("user_id", user_id);
+    if (!error) return data[0];
+  } else {
+    const { data, error } = await supabase
+      .from(`${capitalize(table)}`)
+      .select("*")
+      .eq("user_id", user_id);
+    if (!error) return data[0];
+  }
 }
 
 export async function InsertRowInTable(dataToInsert: object, table: string) {
@@ -143,6 +169,92 @@ export async function UpdateLessonSections(
       status: new_lesson_sections.status,
     })
     .eq("lesson_id", lesson_id);
+}
+
+export async function GenerateRoadmap(
+  profile: Profile,
+  subject: string,
+  diagnosticResults?: object
+) {
+  console.log("Generating roadmap");
+  const model_instructions = `
+Return ONLY a single valid JSON object.
+No markdown. No code fences. No comments. No extra keys. No trailing text.
+The first character must be "{" and the last character must be "}".
+All strings must use double quotes.
+`;
+  const model_prompt = `Generate a roadmap for subject: "${subject}".
+User profile (JSON):
+${JSON.stringify(profile)}
+
+Constraints:
+- Create 7 to 9 units.
+- Each unit must have 5 to 7 topics.
+- Titles and descriptions must be short but complete.
+- Keep it ADHD-friendly: clear, motivating, chunked, low-cognitive-load language.
+
+You MUST output exactly this JSON shape (no extra properties):
+
+{
+  "units": [
+    {
+      "title": "",
+      "tags": [""],
+      "grade": "",
+      "description": "",
+      "topics": [
+        {
+          "title": "",
+          "tags": [""],
+          "grade": "",
+          "description": ""
+        }
+      ]
+    }
+  ]
+}
+`;
+  const roadmap_data_raw = await PromptModel(model_instructions, model_prompt);
+  const roadmap_data = JSON.parse(
+    roadmap_data_raw.content
+      ?.substring(
+        roadmap_data_raw.content?.indexOf("{"),
+        roadmap_data_raw.content?.lastIndexOf("}") + 1
+      )
+      .replaceAll("\n", "") || ""
+  );
+  const firstTopicLessons: Lesson[] = await GenerateLessons(
+    profile,
+    subject,
+    1,
+    roadmap_data["units"][0]["topics"][0]
+  );
+  for (const lesson of firstTopicLessons) {
+    await InsertRowInTable(lesson, "lessons");
+  }
+  let isFirstTopic = true;
+  for (const topic of roadmap_data["units"][0]["topics"]) {
+    if (isFirstTopic) {
+      const topicToUpload: Topic = {
+        ...topic,
+        lesson_ids: firstTopicLessons.map((lesson) => lesson.lesson_id),
+        topic_id: generateId("topic"),
+        user_id: profile.user_id,
+      };
+      console.log(topicToUpload);
+      await InsertRowInTable(topicToUpload, "topics");
+      isFirstTopic = false;
+    } else {
+      topic.topic_id = generateId("topic");
+      topic.user_id = profile.user_id;
+      await InsertRowInTable(topic, "topics");
+    }
+  }
+  const updatedProfile = { ...profile };
+  updatedProfile.current_lesson_ids?.push(firstTopicLessons[0].lesson_id);
+  await updateRowInTable(profile.user_id, updatedProfile, "profiles");
+  // const units = roadmap_data["units"];
+  // console.log(units);
 }
 
 export async function GradeCreativityAnswer(
@@ -293,15 +405,6 @@ export async function GenerateLesson(
   }`;
   }
   const lesson_data_raw = await PromptModel(model_instructions, model_prompt);
-  console.log(`\x1b[33m${JSON.stringify(lesson_data_raw.content)}\x1b[0m`);
-  console.log(
-    `\x1b[35m${lesson_data_raw.content
-      ?.substring(
-        lesson_data_raw.content?.indexOf("{"),
-        lesson_data_raw.content?.lastIndexOf("}") + 1
-      )
-      .replaceAll("\\", "")}\x1b[0m`
-  );
   const lesson_data = JSON.parse(
     lesson_data_raw.content
       ?.substring(
@@ -340,6 +443,83 @@ export async function GenerateLesson(
     lesson_id: lessonID,
   };
   return lesson;
+}
+
+export async function GenerateLessons(
+  profile: Profile,
+  subject: string,
+  unitNumber: number,
+  topic: {
+    title: string;
+    tags: string[];
+    subject: string;
+    description: string[];
+  }
+) {
+  const model_instructions = `
+  -Output must be valid JSON.
+  -Output must be a single JSON object.
+  -Output must not include markdown, code fences, comments, or any other text.
+  -The first character must be { and the last character must be }.`;
+  const model_prompt = `Generate lessons for the subject of ${subject} for this profile:${JSON.stringify(
+    profile
+  )} for this specific topic:${JSON.stringify(topic)} with these specifications:
+  - Adapted to the ADHD suffering user's needs & likes.
+  - Short but yet complete titles & descriptions.
+
+  OUTPUT FORMAT (AVOID USING EXTRA CHARACTERS OTHERS THAN A READY TO PARSE OBJECT): {
+  lessons: {
+  title:string,
+  tags:string[], (1-4 tags)
+  expected_learning:string,
+  lesson_sections (3-5 lesson sections, interspersed types, type probabilities 40% theory, 40% practice, 20% creativity): {
+  type:'theory'|'practice'|'creativity',
+  title:string,
+  exp:number, (10-100 based on difficulty level, you can include even and odd numbers)
+}[] }[] (5-7 lessons)
+  }`;
+  const lessons_data_raw = await PromptModel(model_instructions, model_prompt);
+  const lessons_data = JSON.parse(
+    lessons_data_raw.content
+      ?.substring(
+        lessons_data_raw.content?.indexOf("{") || 0,
+        lessons_data_raw.content?.lastIndexOf("}") + 1 ||
+          lessons_data_raw.content.length - 1
+      )
+      .replaceAll("\\", "") || ""
+  );
+  const lessons = lessons_data["lessons"].map((lesson_data: Lesson) => {
+    const lessonID = generateId("lesson");
+    const lesson: Lesson = {
+      user_id: profile.user_id,
+      subject: subject,
+      approximate_duration: 0,
+      unit: unitNumber,
+      topic: topic.title,
+      title: lesson_data["title"],
+      grade: profile.grade_level,
+      tags: lesson_data["tags"] || [],
+      category: "diagnostic",
+      percentage_completed: 0,
+      status: "not started",
+      expected_learning: lesson_data["expected_learning"].toLowerCase(),
+      lesson_sections: lesson_data["lesson_sections"].map(
+        (section: LessonSection) => {
+          return {
+            type: section["type"],
+            title: section["title"],
+            exp: section["exp"],
+            section_id: generateId("section"),
+            lesson_id: lessonID,
+            status: "not started",
+          };
+        }
+      ),
+      lesson_id: lessonID,
+    };
+    return lesson;
+  });
+  return lessons;
 }
 
 function generateId(prefix: string, characters: number = 10) {

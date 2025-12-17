@@ -4,10 +4,9 @@ import {
   GetRowFromTable,
   GetUser,
 } from "@/app/dashboard/action";
-import { Lesson } from "@/components/custom/dashboard/LessonCardBig";
+import { Lesson } from "@/utils/supabase/tableTypes";
 import LessonContent from "@/components/custom/lessons/lesson/LessonContent";
 import LessonHeader from "@/components/custom/lessons/lesson/LessonHeader";
-import { Fragment } from "react/jsx-runtime";
 
 // const mathLesson: Lesson = {
 //   subject: "Math",
@@ -236,7 +235,7 @@ export default async function LessonPage({
   const { lessonId } = await params;
   const user_id = (await GetUser())?.id;
   const profile = await GetRowFromTable(user_id || "", "profiles");
-  let chosenLesson = await GetLesson(user_id || "", lessonId);
+  let chosenLesson: Lesson = await GetLesson(user_id || "", lessonId);
   if (!chosenLesson.lesson_sections[0].content) {
     chosenLesson = await GenerateSections(profile, chosenLesson);
   }
@@ -249,7 +248,7 @@ export default async function LessonPage({
           duration: chosenLesson.approximate_duration,
         }}
       />
-      <LessonContent lesson={chosenLesson} />
+      <LessonContent lesson={chosenLesson} profile={profile} />
     </div>
   );
 }

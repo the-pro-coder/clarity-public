@@ -2,12 +2,25 @@
 
 import LessonTopSection from "./LessonTopSection";
 import { useState } from "react";
-import { Lesson } from "../../dashboard/LessonCardBig";
 import LessonCard from "./LessonCard";
 import { useRouter } from "next/navigation";
-import { UpdateLessonSections } from "@/app/dashboard/action";
+import {
+  GenerateRoadmap,
+  GetLesson,
+  GetRowFromTable,
+  GetTopic,
+  UpdateLessonSections,
+  updateRowInTable,
+} from "@/app/dashboard/action";
+import { Lesson, Profile, Topic } from "@/utils/supabase/tableTypes";
 
-export default function LessonContent({ lesson }: { lesson: Lesson }) {
+export default function LessonContent({
+  lesson,
+  profile,
+}: {
+  lesson: Lesson;
+  profile: Profile;
+}) {
   const router = useRouter();
   const [currentSection, setCurrentSection] = useState(
     lesson.lesson_sections.find(
@@ -59,6 +72,38 @@ export default function LessonContent({ lesson }: { lesson: Lesson }) {
           sectionType={currentSection.type}
         />
         <LessonCard
+          onCompletedCallbackAction={() => {
+            if (lesson.topic == null) {
+              GenerateRoadmap(profile, lesson.subject).then(() => {
+                router.replace("/dashboard");
+              });
+            } else {
+              const profileUpdated = { ...profile };
+              profileUpdated.current_lesson_ids?.filter((lesson_id) => {
+                return lesson_id != lesson.lesson_id;
+              });
+              GetTopic(profile.user_id, lesson.lesson_id).then((topic) => {
+                const lessonIds = topic?.lesson_ids;
+                console.log(topic);
+                if (!lessonIds) return;
+                const nextLessonId =
+                  lessonIds[
+                    Math.min(
+                      lessonIds.indexOf(lesson.lesson_id) + 1,
+                      lessonIds.length - 1 // change when you add more topic generation
+                    )
+                  ];
+                profileUpdated.current_lesson_ids?.push(nextLessonId);
+                updateRowInTable(
+                  profile.user_id,
+                  profileUpdated,
+                  "profiles"
+                ).then(() => {
+                  router.replace("/dashboard");
+                });
+              });
+            }
+          }}
           section={currentSection}
           content={currentSection.content}
           completedCallbackAction={SetSectionAsCompleted}

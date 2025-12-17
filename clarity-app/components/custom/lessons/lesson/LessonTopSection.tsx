@@ -4,7 +4,7 @@ import {
   IconNode,
   SparklesIcon,
 } from "lucide-react";
-import { LessonSection } from "../../dashboard/LessonCardBig";
+import { LessonSection } from "@/utils/supabase/tableTypes";
 import capitalize from "../../util/Capitalize";
 
 export default function LessonTopSection({
