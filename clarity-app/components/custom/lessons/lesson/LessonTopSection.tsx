@@ -37,7 +37,9 @@ export default function LessonTopSection({
       </div>
       <div>
         <p className="font-bold">{capitalize(sectionType)}</p>
-        <h2 className="text-foreground font-bold text-2xl">{sectionTitle}</h2>
+        <h2 className="text-foreground font-bold text-2xl max-sm:text-xl">
+          {sectionTitle}
+        </h2>
       </div>
     </section>
   );

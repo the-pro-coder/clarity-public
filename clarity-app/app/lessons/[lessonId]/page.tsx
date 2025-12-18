@@ -241,7 +241,7 @@ export default async function LessonPage({
   }
 
   return (
-    <div className="flex flex-col gap-7">
+    <div className="flex flex-col gap-7 items-center w-full max-sm:gap-3">
       <LessonHeader
         data={{
           lessonTitle: chosenLesson.title,

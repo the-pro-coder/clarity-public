@@ -17,6 +17,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { GenerateRoadmap, GradeCreativityAnswer } from "@/app/dashboard/action";
+import { toast } from "sonner";
 
 type TheoryCardContent = {
   type: "theory";
@@ -64,7 +65,7 @@ export default function LessonCard({
 }) {
   if (content == undefined) return;
   return (
-    <Card className="w-full max-h-fit py-4">
+    <Card className="w-full max-h-fit py-4 max-sm:py-2">
       <div className="w-95/100 mx-auto">
         {section.type == "theory" && content.type === "theory" && (
           <TheoryCard
@@ -141,7 +142,7 @@ function TheoryCard({
           onClick={() => {
             setPlaybackState("paused");
           }}
-          className="bg-blue-200 hover:brightness-90 active:brightness-80 transition-all flex w-fit p-2 text-primary rounded-full items-center gap-1"
+          className="bg-blue-200 max-sm:text-xs max-sm:p-1.5 hover:brightness-90 active:brightness-80 transition-all flex w-fit p-2 text-primary rounded-full items-center gap-1"
         >
           <PauseIcon size={20} /> <span>Auto-reading</span>
         </button>
@@ -151,7 +152,7 @@ function TheoryCard({
           onClick={() => {
             setPlaybackState("playing");
           }}
-          className="flex w-fit p-2 bg-accent hover:brightness-90 active:brightness-80 transition-all rounded-full items-center gap-1"
+          className="flex max-sm:text-xs max-sm:p-1.5 w-fit p-2 bg-accent hover:brightness-90 active:brightness-80 transition-all rounded-full items-center gap-1"
         >
           <PlayIcon size={20} /> <span>Click to continue</span>
         </button>
@@ -161,12 +162,12 @@ function TheoryCard({
           onClick={() => {
             setPlaybackState("playing");
           }}
-          className="flex w-fit p-2 bg-emerald-200 hover:brightness-90 active:brightness-80 transition-all rounded-full items-center gap-1 text-emerald-600"
+          className="flex max-sm:text-xs max-sm:p-1.5 w-fit p-2 bg-emerald-200 hover:brightness-90 active:brightness-80 transition-all rounded-full items-center gap-1 text-emerald-600"
         >
           <RotateCcw size={20} /> <span>Play Again</span>
         </button>
       )}
-      <span className="text-xl mt-2 flex flex-col gap-3">
+      <span className="text-xl mt-2 flex flex-col gap-3 max-sm:gap-0 max-sm:text-base">
         {content.sentences.map((sentence, i) => {
           return (
             <span key={i}>
@@ -184,7 +185,7 @@ function TheoryCard({
           );
         })}
       </span>
-      <div className="flex items-center mt-3">
+      <div className="flex items-center mt-3 max-sm:mt-1">
         <Progress
           value={
             playbackState == "ended"
@@ -194,7 +195,7 @@ function TheoryCard({
           className="w-4/5 m-auto"
         />
       </div>
-      <div className="flex mt-5 justify-end">
+      <div className="flex mt-5 max-sm:mt-3 justify-end">
         <Button
           onClick={() => {
             if (!isLastSection) {
@@ -251,8 +252,8 @@ function PracticeCard({
     completedCallbackAction(correct ? "completed" : "incomplete");
   }
   return (
-    <div className="flex flex-col gap-5">
-      <h2 className="font-bold text-2xl">{content.question}</h2>
+    <div className="flex flex-col gap-5 max-sm:gap-2">
+      <h2 className="font-bold text-2xl max-sm:text-xl">{content.question}</h2>
       <RadioGroup
         disabled={answerStatus != "idle"}
         className="flex flex-col"
@@ -293,7 +294,7 @@ function PracticeCard({
         })}
       </RadioGroup>
       <section
-        className={`flex flex-col p-2 rounded-md ${
+        className={`flex flex-col max-sm:hidden p-2 rounded-md ${
           answerStatus == "idle"
             ? "hidden"
             : answerStatus == "correct"
@@ -301,6 +302,20 @@ function PracticeCard({
             : "bg-orange-100 text-orange-400"
         }`}
       >
+        <span className="max-sm:absolute hidden">
+          {answerStatus == "correct" &&
+            toast.success("🎉 Great job!", {
+              description: capitalize(content.explanation),
+              position: "top-center",
+            })}
+        </span>
+        <span className="max-sm:absolute hidden">
+          {answerStatus == "incorrect" &&
+            toast.success("💡 Not quite, but you can learn from this!", {
+              description: capitalize(content.explanation),
+              position: "top-center",
+            })}
+        </span>
         {answerStatus == "correct" && (
           <h3 className="text-xl font-bold">🎉 Great job!</h3>
         )}
@@ -390,13 +405,18 @@ function CreativityCard({
     }
   }
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 max-sm:gap-2">
       <section className="bg-orange-100 p-2 rounded-md border-2 border-orange-400">
-        <h2 className="text-2xl font-bold">{content.instructions}</h2>
+        <h2 className="text-2xl font-bold max-sm:text-lg">
+          {content.instructions}
+        </h2>
       </section>
       <Collapsible>
         <CollapsibleTrigger asChild>
-          <Button className="flex justify-start w-fit" variant={"ghost"}>
+          <Button
+            className="flex justify-start w-fit max-sm:text-sm"
+            variant={"ghost"}
+          >
             <LightbulbIcon />
             <span className="text-secondary">Need some inspiration?</span>
           </Button>
@@ -405,7 +425,7 @@ function CreativityCard({
           <ul className="ml-5 flex flex-col gap-2">
             {content.tips.map((tip, i) => {
               return (
-                <li className="text-secondary" key={i}>
+                <li className="text-secondary max-sm:text-sm" key={i}>
                   - {tip}
                 </li>
               );
@@ -434,7 +454,7 @@ function CreativityCard({
             setCurrentCharacters(e.target.value.trim().length);
           }}
           placeholder="Type your answer here"
-          className="resize-none text-lg min-h-40 max-h-40 bg-orange-100 border-2 border-orange-400 focus-visible:ring-0 focus-visible:border-orange-200 transition-colors md:text-base"
+          className="resize-none max-sm:text-sm max-sm:min-h-30 max-sm:max-h-30 text-lg min-h-40 max-h-40 bg-orange-100 border-2 border-orange-400 focus-visible:ring-0 focus-visible:border-orange-200 transition-colors md:text-base"
         />
         <div className="text-sm">
           <span

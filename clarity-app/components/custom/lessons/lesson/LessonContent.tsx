@@ -66,7 +66,7 @@ export default function LessonContent({
   if (currentSection == undefined) router.push("/dashboard");
   else {
     return (
-      <section className="w-3/7 m-auto flex flex-col gap-4">
+      <section className="max-w-2xl w-4/5 max-sm:w-9/10 mx-auto flex flex-col gap-4">
         <LessonTopSection
           sectionTitle={currentSection.title}
           sectionType={currentSection.type}
