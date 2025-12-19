@@ -849,6 +849,7 @@ export default async function Dashboard() {
       await updateRowInTable(`${user.user_id}`, profile, "profiles");
     } else if (!lessons) {
       // error fetching lessons
+      redirect("/dashboard");
     } else if (typeof lessons != "string") {
       profile.current_lesson_ids = lessons
         .filter((lesson: Lesson) => lesson.status != "completed")

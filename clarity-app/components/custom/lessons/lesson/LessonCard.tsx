@@ -17,7 +17,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { GenerateRoadmap, GradeCreativityAnswer } from "@/app/dashboard/action";
-import { toast } from "sonner";
 
 type TheoryCardContent = {
   type: "theory";
@@ -294,7 +293,7 @@ function PracticeCard({
         })}
       </RadioGroup>
       <section
-        className={`flex flex-col max-sm:hidden p-2 rounded-md ${
+        className={`flex flex-col p-2 rounded-md ${
           answerStatus == "idle"
             ? "hidden"
             : answerStatus == "correct"
@@ -302,29 +301,17 @@ function PracticeCard({
             : "bg-orange-100 text-orange-400"
         }`}
       >
-        <span className="max-sm:absolute hidden">
-          {answerStatus == "correct" &&
-            toast.success("🎉 Great job!", {
-              description: capitalize(content.explanation),
-              position: "top-center",
-            })}
-        </span>
-        <span className="max-sm:absolute hidden">
-          {answerStatus == "incorrect" &&
-            toast.success("💡 Not quite, but you can learn from this!", {
-              description: capitalize(content.explanation),
-              position: "top-center",
-            })}
-        </span>
         {answerStatus == "correct" && (
-          <h3 className="text-xl font-bold">🎉 Great job!</h3>
+          <h3 className="text-xl max-sm:text-base font-bold">🎉 Great job!</h3>
         )}
         {answerStatus == "incorrect" && (
-          <h3 className="text-xl font-bold">
+          <h3 className="text-xl max-sm:text-[15px] font-bold">
             💡 Not quite, but you can learn from this!
           </h3>
         )}
-        <p className="text-foreground">{capitalize(content.explanation)}</p>
+        <p className="text-foreground max-sm:text-sm">
+          {capitalize(content.explanation)}
+        </p>
       </section>
       <div className="flex justify-end">
         <Button
@@ -371,10 +358,6 @@ function CreativityCard({
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   function checkAnswer() {
     if (answerStatus == "incorrect") {
-      setCurrentCharacters(0);
-      if (textAreaRef.current != undefined) {
-        textAreaRef.current.value = "";
-      }
       setAnswerStatus("idle");
       setExplanation("");
     } else if (answerStatus == "correct") {
@@ -384,6 +367,7 @@ function CreativityCard({
         if (textAreaRef.current != undefined) {
           textAreaRef.current.value = "";
         }
+        setCurrentCharacters(0);
         setAnswerStatus("idle");
         continueCallback();
       }

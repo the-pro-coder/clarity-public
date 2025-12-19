@@ -1,5 +1,6 @@
 import { ClockIcon } from "lucide-react";
 import BackButton from "./BackButton";
+import capitalize from "../../util/Capitalize";
 
 export default function LessonHeader({
   data,
@@ -28,7 +29,7 @@ export default function LessonHeader({
         </div>
         <div className="flex flex-1 justify-center">
           <h2 className="text-xl text-primary text-center max-md:text-lg max-sm:text-sm">
-            {data.lessonTitle}
+            {capitalize(data.lessonTitle)}
           </h2>
         </div>
         <div className="flex-1">

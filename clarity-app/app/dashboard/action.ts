@@ -1,5 +1,10 @@
 "use server";
-import { Lesson, LessonSection, Topic } from "@/utils/supabase/tableTypes";
+import {
+  Lesson,
+  LessonSection,
+  Topic,
+  Unit,
+} from "@/utils/supabase/tableTypes";
 import capitalize from "@/components/custom/util/Capitalize";
 import PromptModel from "@/components/custom/util/LLMIntegration";
 import { createClient } from "@/utils/supabase/server";
@@ -84,6 +89,16 @@ export async function GetTopic(user_id: string, lesson_id: string) {
     .select("*")
     .eq("user_id", user_id)
     .contains("lesson_ids", [lesson_id]);
+  if (!error) return data[0];
+}
+
+export async function GetUnit(user_id: string, number: number) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("Units")
+    .select("*")
+    .eq("user_id", user_id)
+    .eq("number", number);
   if (!error) return data[0];
 }
 
@@ -183,7 +198,9 @@ ${JSON.stringify(profile)}
 
 Constraints:
 - Create 7 to 9 units.
+- Each unit must have 1-3 one/two worded tags related with the topics it has.
 - Each unit must have 5 to 7 topics.
+- Each topic must have 1-3 one/two worded tags related with the topic.
 - Titles and descriptions must be short but complete.
 - Keep it ADHD-friendly: clear, motivating, chunked, low-cognitive-load language.
 
@@ -208,7 +225,11 @@ You MUST output exactly this JSON shape (no extra properties):
   ]
 }
 `;
-  const roadmap_data_raw = await PromptModel(model_instructions, model_prompt);
+  const roadmap_data_raw = await PromptModel(
+    model_instructions,
+    model_prompt,
+    "arcee-ai/trinity-mini:free"
+  );
   const roadmap_data = JSON.parse(
     roadmap_data_raw.content
       ?.substring(
@@ -227,27 +248,53 @@ You MUST output exactly this JSON shape (no extra properties):
     await InsertRowInTable(lesson, "lessons");
   }
   let isFirstTopic = true;
-  for (const topic of roadmap_data["units"][0]["topics"]) {
-    if (isFirstTopic) {
-      const topicToUpload: Topic = {
-        ...topic,
-        lesson_ids: firstTopicLessons.map((lesson) => lesson.lesson_id),
-        topic_id: generateId("topic"),
-        user_id: profile.user_id,
-      };
-      console.log(topicToUpload);
-      await InsertRowInTable(topicToUpload, "topics");
-      isFirstTopic = false;
-    } else {
-      topic.topic_id = generateId("topic");
-      topic.user_id = profile.user_id;
-      await InsertRowInTable(topic, "topics");
+
+  const units = roadmap_data["units"];
+  const unitTopicIds = [];
+  for (let i = 0; i < units.length; i++) {
+    const topicIds = [];
+    for (let k = 0; k < units[i]["topics"].length; k++) {
+      const topicId = generateId("topic");
+      topicIds.push(topicId);
+      const topic = units[i]["topics"][k];
+      if (isFirstTopic) {
+        const topicToUpload: Topic = {
+          ...topic,
+          lesson_ids: firstTopicLessons.map((lesson) => lesson.lesson_id),
+          topic_id: topicId,
+          subject: subject,
+          user_id: profile.user_id,
+        };
+        // console.log(topicToUpload);
+        await InsertRowInTable(topicToUpload, "topics");
+        isFirstTopic = false;
+      } else {
+        topic.topic_id = topicId;
+        topic.user_id = profile.user_id;
+        topic.subject = subject;
+        await InsertRowInTable(topic, "topics");
+      }
     }
+    unitTopicIds.push(topicIds);
   }
   const updatedProfile = { ...profile };
   updatedProfile.current_lesson_ids?.push(firstTopicLessons[0].lesson_id);
   await updateRowInTable(profile.user_id, updatedProfile, "profiles");
-  // const units = roadmap_data["units"];
+  for (let i = 0; i < units.length; i++) {
+    const unit = units[i];
+    const unitId = generateId("unit");
+    delete unit.topics;
+    const unitToUpload: Unit = {
+      ...unit,
+      number: i + 1,
+      subject: subject,
+      topic_ids: unitTopicIds[i],
+      user_id: profile.user_id,
+      unit_id: unitId,
+    };
+    console.log(unitToUpload);
+    await InsertRowInTable(unitToUpload, "units");
+  }
   // console.log(units);
 }
 
@@ -614,9 +661,9 @@ Lesson requirements:
 - Distribution is a soft target, but MUST satisfy these hard constraints PER LESSON:
   - At least 1 "practice" section.
   - At least 1 "creativity" section. (required)
-  - "theory" is optional.
+  - At least 1 "theory" section.
 - If a lesson has 3 sections: include exactly 1 creativity + at least 1 practice.
-- If a lesson has 4-5 sections: include 1-2 creativity and 1-3 practice (rest may be theory).
+- If a lesson has 4-5 sections: include 1 creativity, 1-2 theory, and 1-2 practice.
 - Prefer 4 or 5 lesson sections when the content reasonably allows it.
 - Use only 3 sections if the lesson would become repetitive or bloated with more.
 - Across the generated lessons, avoid always using the same section count.
@@ -692,7 +739,7 @@ Section count control:
       title: lesson_data["title"],
       grade: profile.grade_level,
       tags: lesson_data["tags"] || [],
-      category: "diagnostic",
+      category: "default",
       percentage_completed: 0,
       status: "not started",
       expected_learning: lesson_data["expected_learning"].toLowerCase(),
@@ -712,6 +759,151 @@ Section count control:
     };
     return lesson;
   });
+  return lessons;
+}
+
+export async function GenerateLessonsAndUpload(
+  profile: Profile,
+  subject: string,
+  unitNumber: number,
+  topic: {
+    title: string;
+    tags: string[];
+    subject: string;
+    description: string[];
+  }
+) {
+  const model_instructions = `
+You are a JSON-only generator.
+
+Rules:
+- Return ONLY a single valid JSON object.
+- No markdown, code fences, comments, or extra text.
+- The first character must be "{" and the last character must be "}".
+- Use double quotes for all keys and string values.
+- Output must match the schema exactly and must not include extra keys.
+- Do not mention any medical conditions or diagnoses.
+`;
+
+  const model_prompt = `
+Task:
+Generate 5 to 7 lessons for subject: "${subject}" focused on the given topic.
+
+Student profile (JSON):
+${JSON.stringify(profile)}
+
+Topic (JSON):
+${JSON.stringify(topic)}
+
+Lesson requirements:
+- Titles and expected_learning must be short but complete.
+- Each lesson must be meaningfully different (different sub-skill, angle, or progression step).
+- Each lesson must have 3 to 5 lesson sections.
+- Section types must be chosen deliberately for completeness (intro → practice → reinforcement).
+- Distribution is a soft target, but MUST satisfy these hard constraints PER LESSON:
+  - At least 1 "practice" section.
+  - At least 1 "creativity" section. (required)
+  - At least 1 "theory" section.
+- If a lesson has 3 sections: include exactly 1 creativity + at least 1 practice.
+- If a lesson has 4-5 sections: include 1 creativity, 1-2 theory, and 1-2 practice.
+- Prefer 4 or 5 lesson sections when the content reasonably allows it.
+- Use only 3 sections if the lesson would become repetitive or bloated with more.
+- Across the generated lessons, avoid always using the same section count.
+
+Across the full set of lessons:
+- At least 2 lessons must have 4 sections.
+- At least 1 lesson must have 5 sections.
+- No more than 2 lessons may have only 3 sections.
+
+Output schema (EXACT, no extra properties):
+{
+  "lessons": [
+    {
+      "title": "",
+      "tags": [""],
+      "expected_learning": "",
+      "lesson_sections": [
+        { "type": "theory", "title": "", "exp": 10 }
+      ]
+    }
+  ]
+}
+
+Constraints:
+- lessons: 5 to 7 items.
+- tags: 1 to 4 items.
+- lesson_sections: 3 to 5 items.
+- type must be one of: "theory", "practice", "creativity".
+- exp must be an integer 10 to 100.
+
+Quality rules:
+- Section titles: 2-7 words, concrete and action-oriented.
+- exp should reflect difficulty (earlier lessons lower, later lessons higher).
+- Avoid repeating the same lesson title or identical section patterns across lessons.
+
+Silent self-check before output:
+- Valid JSON and single object?
+- Only top-level key "lessons"?
+- lessons length 5-7?
+- For each lesson:
+  - tags 1-4?
+  - sections 3-5?
+  - contains at least 1 practice AND at least 1 creativity?
+  - types valid and exp valid integer 10-100?
+- No extra keys anywhere?
+Fix silently and output only the JSON object.
+Section count control:
+- Each lesson must have 3 to 5 sections.
+- Prefer 4 or 5 sections for most lessons.
+- Use 3 sections ONLY when the lesson focuses on a single narrow skill.
+- Across all lessons, avoid repeating the same section count for every lesson.
+- Are section counts varied across lessons (not all equal)?
+`;
+
+  const lessons_data_raw = await PromptModel(model_instructions, model_prompt);
+  const lessons_data = JSON.parse(
+    lessons_data_raw.content
+      ?.substring(
+        lessons_data_raw.content?.indexOf("{") || 0,
+        lessons_data_raw.content?.lastIndexOf("}") + 1 ||
+          lessons_data_raw.content.length - 1
+      )
+      .replaceAll("\\", "") || ""
+  );
+  const lessons = lessons_data["lessons"].map((lesson_data: Lesson) => {
+    const lessonID = generateId("lesson");
+    const lesson: Lesson = {
+      user_id: profile.user_id,
+      subject: subject,
+      approximate_duration: 0,
+      unit: unitNumber,
+      topic: topic.title,
+      title: lesson_data["title"],
+      grade: profile.grade_level,
+      tags: lesson_data["tags"] || [],
+      category: "default",
+      percentage_completed: 0,
+      status: "not started",
+      expected_learning: lesson_data["expected_learning"].toLowerCase(),
+      lesson_sections: lesson_data["lesson_sections"].map(
+        (section: LessonSection) => {
+          return {
+            type: section["type"],
+            title: section["title"],
+            exp: section["exp"],
+            section_id: generateId("section"),
+            lesson_id: lessonID,
+            status: "not started",
+          };
+        }
+      ),
+      lesson_id: lessonID,
+    };
+    return lesson;
+  });
+  for (const lesson of lessons) {
+    await InsertRowInTable(lesson, "lessons");
+  }
   return lessons;
 }
 
