@@ -92,12 +92,17 @@ export async function GetTopic(user_id: string, lesson_id: string) {
   if (!error) return data[0];
 }
 
-export async function GetUnit(user_id: string, number: number) {
+export async function GetUnit(
+  user_id: string,
+  subject: string,
+  number: number
+) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("Units")
     .select("*")
     .eq("user_id", user_id)
+    .eq("subject", subject)
     .eq("number", number);
   if (!error) return data[0];
 }
@@ -384,7 +389,8 @@ Output schema (MUST match exactly; no extra properties):
   "lessonSectionsContent": [
     {
       "type": "theory",
-      "sentences": [""]
+      "sentences": [""],
+      "keywords": [[]]
     },
     {
       "type": "practice",
@@ -411,18 +417,35 @@ Hard rules:
 
 Per-type requirements:
 - theory:
-  - "sentences" must contain 3-8 short, clear sentences.
+  - "sentences" must contain 3-6 short, clear sentences.
+  - "sentences" should have an explanatory order for the section.
+  - "sentences" should go in a slow pace and explain clearly all concept words involved.
+  - "sentences" should include examples for better understanding of concepts.
+  - "keywords" should contain the same arrayed elements as "sentences".
+  - "keywords" should contain 0-2 keywords for each element.
+  - "keywords" should be preferrable 0 keywords per element, avoid unless illustration for the concept is essential.
+  - "keywords" should be two words per keyword.
+  - "keywords" (for each keyword inside each element) should be a tangible, common, iconic, search words for a relevant image.
+  - Just include keywords when they don't portrait an invisible concept.
+  - Just include keywords when it is helpful for the example and non-reduntant, prefer 0 keywords unless an example is provided or a new concept that is visible is related.
+  - If the keyword by itself doesn't make sense for the context it is provided, change it for one that would meet that requirement.
 - practice:
   - "answers" must contain 4-6 options.
   - Exactly 1 answer must have "correct": true.
-  - "explanation" must justify why that option is correct.
+  - There should be only 1 strictly best answer, not multiple possible acceptable answers.
+  - Question shouldn't be too long.
+  - "explanation" must justify why that option is correct in a clear, short, concise way.
 - creativity:
   - "tips" must contain 3-6 tips.
-  - "minCharacters" must be between 50 and 500.
+  - "tips" shouldn't be a direct correct answer to the assignment.
+  - "tips" shouldn't reveal the answer for the task, but give enlightment.
+  - assignment shouldn't be too tedious and should be fun, short and challenging.
+  - assignment should take into account the user will only be able to respond in text.
+  - "minCharacters" must be between 20 and 500.
 
 Time requirement:
 - approxDurationMinutes must be a realistic total estimate based on section count and difficulty.
-- Use roughly 1-4 minutes per section (harder sections → higher within that range).
+- Use roughly 1-3 minutes per section (harder sections → higher within that range), (theory sections aprox. 0.5 minutes each, practice sections 1-2 minutes each, and creativity sections 2-4 minutes each).
 - Do not output extreme times.
 
 Silent self-check before output:

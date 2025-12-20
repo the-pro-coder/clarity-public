@@ -2,7 +2,8 @@
 import { Button } from "@/components/ui/button";
 import capitalize from "../util/Capitalize";
 import { useState } from "react";
-import LessonCardBig, { Lesson } from "./LessonCardBig";
+import LessonCardBig from "./LessonCardBig";
+import { Lesson } from "@/utils/supabase/tableTypes";
 
 // const mathLesson: Lesson = {
 //   subject: "Math",

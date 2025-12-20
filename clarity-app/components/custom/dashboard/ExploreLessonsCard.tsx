@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { Button } from "@/components/ui/button";
-import { Lesson } from "./LessonCardBig";
+import { Lesson } from "@/utils/supabase/tableTypes";
 import Tag from "../util/Tag";
 import capitalize from "../util/Capitalize";
 export default function ExploreLessonsCard({ lessons }: { lessons: Lesson[] }) {

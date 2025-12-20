@@ -99,47 +99,49 @@ export default function LessonContent({
                   ];
                 if (lesson.lesson_id === lessonIds[lessonIds.length - 1]) {
                   // change to next topic
-                  GetUnit(profile.user_id, lesson.unit).then((unit) => {
-                    const topicIds = unit.topic_ids;
-                    if (!topicIds) return;
-                    const nextTopicId =
-                      topicIds[
-                        Math.min(
-                          topicIds.indexOf(topic.topic_id) + 1,
-                          topicIds.length - 1
-                        )
-                      ];
-                    if (nextTopicId == topicIds[topicIds.length - 1]) {
-                      // unit finished, change to next unit.
-                    }
-                    GetRowFromTable(
-                      profile.user_id,
-                      "Topics",
-                      nextTopicId,
-                      "topic_id"
-                    ).then((topic) => {
-                      GenerateLessonsAndUpload(
-                        profile,
-                        topic.subject,
-                        unit.number + 1,
-                        topic
-                      ).then((lessons) => {
-                        nextLessonId = lessons[0].lesson_id;
-                        topic.lesson_ids = lessons.map(
-                          (lesson: Lesson) => lesson.lesson_id
-                        );
-                        updateRowInTable(profile.user_id, topic, "topics");
-                        profileUpdated.current_lesson_ids?.push(nextLessonId);
-                        updateRowInTable(
-                          profile.user_id,
-                          profileUpdated,
-                          "profiles"
-                        ).then(() => {
-                          router.replace("/dashboard");
+                  GetUnit(profile.user_id, lesson.subject, lesson.unit).then(
+                    (unit) => {
+                      const topicIds = unit.topic_ids;
+                      if (!topicIds) return;
+                      const nextTopicId =
+                        topicIds[
+                          Math.min(
+                            topicIds.indexOf(topic.topic_id) + 1,
+                            topicIds.length - 1
+                          )
+                        ];
+                      if (nextTopicId == topicIds[topicIds.length - 1]) {
+                        // unit finished, change to next unit.
+                      }
+                      GetRowFromTable(
+                        profile.user_id,
+                        "Topics",
+                        nextTopicId,
+                        "topic_id"
+                      ).then((topic) => {
+                        GenerateLessonsAndUpload(
+                          profile,
+                          topic.subject,
+                          unit.number,
+                          topic
+                        ).then((lessons) => {
+                          nextLessonId = lessons[0].lesson_id;
+                          topic.lesson_ids = lessons.map(
+                            (lesson: Lesson) => lesson.lesson_id
+                          );
+                          updateRowInTable(profile.user_id, topic, "topics");
+                          profileUpdated.current_lesson_ids?.push(nextLessonId);
+                          updateRowInTable(
+                            profile.user_id,
+                            profileUpdated,
+                            "profiles"
+                          ).then(() => {
+                            router.replace("/dashboard");
+                          });
                         });
                       });
-                    });
-                  });
+                    }
+                  );
                 } else {
                   profileUpdated.current_lesson_ids?.push(nextLessonId);
                   updateRowInTable(

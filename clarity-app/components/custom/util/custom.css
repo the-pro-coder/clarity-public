@@ -1,0 +1,32 @@
+.morph-img {
+  top: 500px;
+  opacity: 0;
+  animation: morph-img-anim 3s ease-in 0.5s both;
+}
+
+@keyframes morph-img-anim {
+  0% {
+    top: 500px;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  25% {
+    transform: translateX(25px);
+  }
+  50% {
+    transform: translateX(-25px);
+  }
+  75% {
+    transform: translateX(25px);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    top: 100px;
+    transform: translateX(-25px);
+    opacity: 0;
+  }
+}

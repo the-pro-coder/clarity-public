@@ -847,7 +847,7 @@ export default async function Dashboard() {
         (lesson: Lesson) => lesson.lesson_id
       );
       await updateRowInTable(`${user.user_id}`, profile, "profiles");
-    } else if (!lessons) {
+    } else if (!lessons || lessons.length < profile.interest_areas.length) {
       // error fetching lessons
       redirect("/dashboard");
     } else if (typeof lessons != "string") {
