@@ -7,14 +7,13 @@ import { useRouter } from "next/navigation";
 import {
   GenerateLessonsAndUpload,
   GenerateRoadmap,
-  GetLesson,
   GetRowFromTable,
   GetTopic,
   GetUnit,
   UpdateLessonSections,
   updateRowInTable,
 } from "@/app/dashboard/action";
-import { Lesson, Profile, Topic } from "@/utils/supabase/tableTypes";
+import { Lesson, Profile } from "@/utils/supabase/tableTypes";
 import GeneratingContent from "../../prefabs/Loading Screen/GeneratingContent";
 
 export default function LessonContent({

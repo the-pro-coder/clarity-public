@@ -231,6 +231,7 @@ export default function NextLessonArea({
   currentLessons: Lesson[] | string;
 }) {
   const [activeSubject, setActiveSubject] = useState(interestSubjects[0]);
+  console.log(currentLessons);
   if (typeof currentLessons == "string") return;
   const lesson = currentLessons.find(
     (lesson) => lesson.subject == activeSubject

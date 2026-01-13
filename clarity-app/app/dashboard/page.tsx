@@ -7,8 +7,10 @@ import {
   GenerateLesson,
   InsertRowInTable,
   updateRowInTable,
+  GetUnit,
+  GetTopic,
 } from "./action";
-import { Profile, Preferences } from "@/utils/supabase/tableTypes";
+import { Profile, Preferences, Topic } from "@/utils/supabase/tableTypes";
 import { Flame } from "lucide-react";
 import NextLessonArea from "@/components/custom/dashboard/NextLessonArea";
 import ImprovementAreaSection from "@/components/custom/dashboard/ImprovementAreaSection";
@@ -849,13 +851,35 @@ export default async function Dashboard() {
       await updateRowInTable(`${user.user_id}`, profile, "profiles");
     } else if (!lessons || lessons.length < profile.interest_areas.length) {
       // error fetching lessons
-      redirect("/dashboard");
     } else if (typeof lessons != "string") {
+      const completedLesson: Lesson = lessons.filter(
+        (lesson: Lesson) => lesson.status == "completed"
+      );
+
       profile.current_lesson_ids = lessons
         .filter((lesson: Lesson) => lesson.status != "completed")
         .map((lesson: Lesson) => lesson.lesson_id);
       if (profile.current_lesson_ids.length < 2) {
         // generate other lessons.
+        const topic: Topic = await GetTopic(
+          profile.user_id,
+          completedLesson.lesson_id
+        );
+        const fetchedLessons = await GetLessons(
+          profile.user_id,
+          topic.lesson_ids
+        );
+        const uncompleteLessons = fetchedLessons?.filter(
+          (lesson: Lesson) => lesson.status != "completed"
+        );
+        if (uncompleteLessons != null) {
+          if (uncompleteLessons.length > 0) {
+            const nextLesson: Lesson = uncompleteLessons[0];
+            profile.current_lesson_ids.push(nextLesson.lesson_id);
+          } else {
+            // should move to next topic
+          }
+        }
       }
       await updateRowInTable(`${user.user_id}`, profile, "profiles");
     }

@@ -390,7 +390,6 @@ Output schema (MUST match exactly; no extra properties):
     {
       "type": "theory",
       "sentences": [""],
-      "keywords": [[]]
     },
     {
       "type": "practice",
@@ -419,21 +418,18 @@ Per-type requirements:
 - theory:
   - "sentences" must contain 3-6 short, clear sentences.
   - "sentences" should have an explanatory order for the section.
+  - "sentences" should wrap around dots (.text.) content to highlight, and around double dots keywords (..keyword..)
   - "sentences" should go in a slow pace and explain clearly all concept words involved.
+  - "sentences" should may be a step by step breakdown if the lesson type requires to (procedimental lessons).
+  - "sentences" should address the most important points of the section for an appropriate learning.
   - "sentences" should include examples for better understanding of concepts.
-  - "keywords" should contain the same arrayed elements as "sentences".
-  - "keywords" should contain 0-2 keywords for each element.
-  - "keywords" should be preferrable 0 keywords per element, avoid unless illustration for the concept is essential.
-  - "keywords" should be two words per keyword.
-  - "keywords" (for each keyword inside each element) should be a tangible, common, iconic, search words for a relevant image.
-  - Just include keywords when they don't portrait an invisible concept.
-  - Just include keywords when it is helpful for the example and non-reduntant, prefer 0 keywords unless an example is provided or a new concept that is visible is related.
-  - If the keyword by itself doesn't make sense for the context it is provided, change it for one that would meet that requirement.
+  - "sentences" shouldn't dismiss a key subject without explaining why/how it can be achieved.
 - practice:
   - "answers" must contain 4-6 options.
   - Exactly 1 answer must have "correct": true.
   - There should be only 1 strictly best answer, not multiple possible acceptable answers.
   - Question shouldn't be too long.
+  - Question should be related and take into consideration to address understanding of any of the previous theory sections, best the closest theory section to this section.
   - "explanation" must justify why that option is correct in a clear, short, concise way.
 - creativity:
   - "tips" must contain 3-6 tips.

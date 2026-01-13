@@ -16,14 +16,12 @@ import {
 } from "@/components/ui/collapsible";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
-import { GenerateRoadmap, GradeCreativityAnswer } from "@/app/dashboard/action";
+import { GradeCreativityAnswer } from "@/app/dashboard/action";
 import FinishedLesson from "./FinishedLesson";
-import SearchImage from "../../util/SearchImage";
 
 type TheoryCardContent = {
   type: "theory";
   sentences: string[];
-  keywords: string[][];
 };
 
 type Answer = {
@@ -134,16 +132,12 @@ function TheoryCard({
     "playing" | "paused" | "ended"
   >("playing");
   const [currentSentence, setCurrentSentence] = useState(0);
-  const [currentKeywords, setCurrentKeywords] = useState(
-    content.keywords[currentSentence]
-  );
   useEffect(() => {
     if (playbackState != "playing") return;
     const i = setInterval(() => {
       setCurrentSentence((prev) => {
         const next = prev + 1;
         if (next < content.sentences.length) {
-          setCurrentKeywords(content.keywords[next]);
           return next;
         }
         clearInterval(i);
@@ -152,32 +146,10 @@ function TheoryCard({
       });
     }, playbackSpeed * 1000);
     return () => clearInterval(i);
-  }, [
-    playbackSpeed,
-    content.sentences.length,
-    playbackState,
-    setCurrentKeywords,
-    content.keywords,
-  ]);
+  }, [playbackSpeed, content.sentences.length, playbackState]);
   if (playbackState === "ended") completedCallbackAction("completed");
   return (
     <div className="flex flex-col">
-      {currentKeywords.length > 0 && (
-        <Fragment>
-          {currentKeywords.length == 1 && (
-            <SearchImage
-              className="rounded-full shadow-md left-1/5 absolute morph-img"
-              keyword={currentKeywords[0]}
-            />
-          )}
-          {currentKeywords.length > 1 && (
-            <SearchImage
-              className="right-1/5 shadow-xl rounded-full absolute morph-img"
-              keyword={currentKeywords[currentKeywords.length - 1]}
-            />
-          )}
-        </Fragment>
-      )}
       {playbackState === "playing" && (
         <button
           onClick={() => {
