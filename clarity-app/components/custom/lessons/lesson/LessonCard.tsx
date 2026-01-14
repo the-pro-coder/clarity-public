@@ -191,7 +191,25 @@ function TheoryCard({
                     : ""
                 } transition-colors`}
               >
-                {sentence.trim()}
+                {sentence
+                  .trim()
+                  .split("..")
+                  .map((chunk, k) => {
+                    if (chunk.includes("..-")) {
+                      return (
+                        <span key={k} className="text-primary">
+                          {chunk.substring(3, chunk.length - 3)}
+                        </span>
+                      );
+                    } else if (chunk.includes("-")) {
+                      return (
+                        <span key={k} className="text-red-400">
+                          {chunk.substring(1, chunk.length - 1)}
+                        </span>
+                      );
+                    }
+                    return chunk;
+                  })}
               </span>
               <hr className="my-2" />
             </span>

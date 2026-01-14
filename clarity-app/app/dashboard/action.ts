@@ -418,7 +418,7 @@ Per-type requirements:
 - theory:
   - "sentences" must contain 3-6 short, clear sentences.
   - "sentences" should have an explanatory order for the section.
-  - "sentences" should wrap around dots (.text.) content to highlight, and around double dots keywords (..keyword..)
+  - "sentences" should wrap around double dots and dashes (..-text-..) content to highlight, and around quadruple dots and dashes keywords (....-keyword-....)
   - "sentences" should go in a slow pace and explain clearly all concept words involved.
   - "sentences" should may be a step by step breakdown if the lesson type requires to (procedimental lessons).
   - "sentences" should address the most important points of the section for an appropriate learning.
