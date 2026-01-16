@@ -182,39 +182,55 @@ function TheoryCard({
       )}
       <span className="text-xl mt-2 flex flex-col gap-3 max-sm:gap-0 max-sm:text-base">
         {content.sentences.map((sentence, i) => {
+          const tokens = sentence.match(/\[[^\]]+\]|\*\*[^*]+\*\*|\S+/g);
           return (
             <span key={i}>
-              <span
-                className={`${
-                  currentSentence == i && playbackState != "ended"
-                    ? "bg-amber-200 font-medium px-1"
-                    : ""
-                } transition-colors`}
-              >
-                {sentence
-                  .trim()
-                  .split("..")
-                  .map((chunk, k) => {
-                    if (chunk.includes("..-")) {
-                      return (
-                        <span key={k} className="text-primary">
-                          {chunk.substring(3, chunk.length - 3)}
-                        </span>
-                      );
-                    } else if (chunk.includes("-")) {
-                      return (
-                        <span key={k} className="text-red-400">
-                          {chunk.substring(1, chunk.length - 1)}
-                        </span>
-                      );
-                    }
-                    return chunk;
-                  })}
-              </span>
-              <hr className="my-2" />
+              {tokens?.map((token, k) => {
+                if (token.includes("[")) {
+                  return (
+                    <span
+                      key={k}
+                      className={`${
+                        currentSentence == i && playbackState != "ended"
+                          ? "bg-amber-200 font-medium px-1"
+                          : ""
+                      } transition-colors text-primary font-semibold`}
+                    >
+                      {` ${token.replaceAll("[", "").replaceAll("]", "")}`}
+                    </span>
+                  );
+                } else if (token.includes("**")) {
+                  return (
+                    <span
+                      key={k}
+                      className={`${
+                        currentSentence == i && playbackState != "ended"
+                          ? "bg-amber-200 font-medium px-1"
+                          : ""
+                      } transition-colors text-red-400 font-medium`}
+                    >
+                      {` ${token.replaceAll("*", "")}`}
+                    </span>
+                  );
+                } else {
+                  return (
+                    <span
+                      key={k}
+                      className={`${
+                        currentSentence == i && playbackState != "ended"
+                          ? "bg-amber-200 font-medium px-1"
+                          : ""
+                      } transition-colors`}
+                    >
+                      {` ${token}`}
+                    </span>
+                  );
+                }
+              })}
             </span>
           );
         })}
+        <hr className="my-2" />
       </span>
       <div className="flex items-center mt-3 max-sm:mt-1">
         <Progress

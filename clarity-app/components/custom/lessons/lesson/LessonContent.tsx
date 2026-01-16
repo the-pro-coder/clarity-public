@@ -12,6 +12,7 @@ import {
   GetUnit,
   UpdateLessonSections,
   updateRowInTable,
+  updateTopicRowInTable,
 } from "@/app/dashboard/action";
 import { Lesson, Profile } from "@/utils/supabase/tableTypes";
 import GeneratingContent from "../../prefabs/Loading Screen/GeneratingContent";
@@ -83,9 +84,10 @@ export default function LessonContent({
               });
             } else {
               const profileUpdated = { ...profile };
-              profileUpdated.current_lesson_ids?.filter((lesson_id) => {
-                return lesson_id != lesson.lesson_id;
-              });
+              profileUpdated.current_lesson_ids =
+                profileUpdated.current_lesson_ids?.filter((lesson_id) => {
+                  return lesson_id != lesson.lesson_id;
+                }) || null;
               GetTopic(profile.user_id, lesson.lesson_id).then((topic) => {
                 const lessonIds = topic?.lesson_ids;
                 if (!lessonIds) return;
@@ -98,6 +100,7 @@ export default function LessonContent({
                   ];
                 if (lesson.lesson_id === lessonIds[lessonIds.length - 1]) {
                   // change to next topic
+                  const idToRemove = lesson.lesson_id;
                   GetUnit(profile.user_id, lesson.subject, lesson.unit).then(
                     (unit) => {
                       const topicIds = unit.topic_ids;
@@ -128,7 +131,17 @@ export default function LessonContent({
                           topic.lesson_ids = lessons.map(
                             (lesson: Lesson) => lesson.lesson_id
                           );
-                          updateRowInTable(profile.user_id, topic, "topics");
+                          console.log(topic.lesson_ids);
+                          console.log(topic);
+                          updateTopicRowInTable(
+                            profile.user_id,
+                            topic,
+                            topic.topic_id
+                          );
+                          profileUpdated.current_lesson_ids =
+                            profileUpdated.current_lesson_ids?.filter(
+                              (lesson_id) => lesson_id != idToRemove
+                            ) || null;
                           profileUpdated.current_lesson_ids?.push(nextLessonId);
                           updateRowInTable(
                             profile.user_id,

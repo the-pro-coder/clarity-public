@@ -148,6 +148,19 @@ export async function updateRowInTable(
     .eq("user_id", user_id);
 }
 
+export async function updateTopicRowInTable(
+  user_id: string,
+  dataToInsert: object,
+  topic_id: string
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("Topics")
+    .update(dataToInsert)
+    .eq("user_id", user_id)
+    .eq("topic_id", topic_id);
+}
+
 export async function GetLesson(user_id: string, lesson_id: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -375,6 +388,7 @@ Rules:
 Task:
 Generate the content for each lesson section in the input lesson.sections list.
 Do NOT add, remove, reorder, or rename sections.
+Only Theory section is allowed to use special notation for keywords.
 Each output item must follow the correct shape for its "type".
 
 Input lesson sections (JSON):
@@ -418,7 +432,7 @@ Per-type requirements:
 - theory:
   - "sentences" must contain 3-6 short, clear sentences.
   - "sentences" should have an explanatory order for the section.
-  - "sentences" should wrap around double dots and dashes (..-text-..) content to highlight, and around quadruple dots and dashes keywords (....-keyword-....)
+  - "sentences" should wrap around double asterisks (**text**) specific content to highlight, and around brackets single keywords ([keyword])
   - "sentences" should go in a slow pace and explain clearly all concept words involved.
   - "sentences" should may be a step by step breakdown if the lesson type requires to (procedimental lessons).
   - "sentences" should address the most important points of the section for an appropriate learning.
@@ -433,6 +447,7 @@ Per-type requirements:
   - "explanation" must justify why that option is correct in a clear, short, concise way.
 - creativity:
   - "tips" must contain 3-6 tips.
+  - Ensure to provide all the needed materials for the task (paragraph, problem, or whatever you're asking for)
   - "tips" shouldn't be a direct correct answer to the assignment.
   - "tips" shouldn't reveal the answer for the task, but give enlightment.
   - assignment shouldn't be too tedious and should be fun, short and challenging.
