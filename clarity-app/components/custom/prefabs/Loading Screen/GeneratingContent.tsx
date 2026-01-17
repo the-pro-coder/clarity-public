@@ -16,7 +16,7 @@ function SpinnerEmpty() {
         </EmptyMedia>
         <EmptyTitle>Generating Content</EmptyTitle>
         <EmptyDescription>
-          Please wait while we personalize your learning experience.
+          Please wait while we customize your learning experience.
         </EmptyDescription>
       </EmptyHeader>
     </Empty>

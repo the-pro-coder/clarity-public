@@ -192,22 +192,25 @@ function TheoryCard({
                       key={k}
                       className={`${
                         currentSentence == i && playbackState != "ended"
-                          ? "bg-amber-200 font-medium px-1"
-                          : ""
-                      } transition-colors text-primary font-semibold`}
+                          ? "bg-amber-200 text-muted-foreground font-bold"
+                          : "text-primary"
+                      } transition-colors font-semibold`}
                     >
-                      {` ${token.replaceAll("[", "").replaceAll("]", "")}`}
+                      {` ${token
+                        .replaceAll("[", "")
+                        .replaceAll("]", "")
+                        .replaceAll("*", "")}`}
                     </span>
                   );
-                } else if (token.includes("**")) {
+                } else if (token.includes("*")) {
                   return (
                     <span
                       key={k}
                       className={`${
                         currentSentence == i && playbackState != "ended"
-                          ? "bg-amber-200 font-medium px-1"
-                          : ""
-                      } transition-colors text-red-400 font-medium`}
+                          ? "bg-amber-200 text-muted-foreground font-bold"
+                          : "text-red-400"
+                      } transition-colors font-medium`}
                     >
                       {` ${token.replaceAll("*", "")}`}
                     </span>
@@ -218,7 +221,7 @@ function TheoryCard({
                       key={k}
                       className={`${
                         currentSentence == i && playbackState != "ended"
-                          ? "bg-amber-200 font-medium px-1"
+                          ? "bg-amber-200 font-medium"
                           : ""
                       } transition-colors`}
                     >
@@ -398,6 +401,7 @@ function CreativityCard({
   onFinishedCallback: () => void;
 }) {
   const [currentCharacters, setCurrentCharacters] = useState(0);
+  const [tipsOpen, setTipsOpen] = useState(false);
   const router = useRouter();
   const [answerStatus, setAnswerStatus] = useState<
     "correct" | "incorrect" | "idle"
@@ -444,13 +448,18 @@ function CreativityCard({
         </h2>
       </section>
       <Collapsible>
-        <CollapsibleTrigger asChild>
+        <CollapsibleTrigger
+          asChild
+          onClick={() => setTipsOpen((prev) => !prev)}
+        >
           <Button
             className="flex justify-start w-fit max-sm:text-sm"
             variant={"ghost"}
           >
             <LightbulbIcon />
-            <span className="text-secondary">Need some inspiration?</span>
+            <span className="text-secondary">
+              {tipsOpen ? "Hide tips" : "Need some inspiration?"}
+            </span>
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-1">

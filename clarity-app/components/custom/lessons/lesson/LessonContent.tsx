@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import {
   GenerateLessonsAndUpload,
   GenerateRoadmap,
+  GetRoadmap,
   GetRowFromTable,
   GetTopic,
   GetUnit,
@@ -14,7 +15,7 @@ import {
   updateRowInTable,
   updateTopicRowInTable,
 } from "@/app/dashboard/action";
-import { Lesson, Profile } from "@/utils/supabase/tableTypes";
+import { Lesson, Profile, Roadmap, Unit } from "@/utils/supabase/tableTypes";
 import GeneratingContent from "../../prefabs/Loading Screen/GeneratingContent";
 
 export default function LessonContent({
@@ -101,6 +102,8 @@ export default function LessonContent({
                 if (lesson.lesson_id === lessonIds[lessonIds.length - 1]) {
                   // change to next topic
                   const idToRemove = lesson.lesson_id;
+                  const subject = lesson.subject;
+                  const unitNumber = lesson.unit;
                   GetUnit(profile.user_id, lesson.subject, lesson.unit).then(
                     (unit) => {
                       const topicIds = unit.topic_ids;
@@ -114,44 +117,100 @@ export default function LessonContent({
                         ];
                       if (nextTopicId == topicIds[topicIds.length - 1]) {
                         // unit finished, change to next unit.
-                      }
-                      GetRowFromTable(
-                        profile.user_id,
-                        "Topics",
-                        nextTopicId,
-                        "topic_id"
-                      ).then((topic) => {
-                        GenerateLessonsAndUpload(
-                          profile,
-                          topic.subject,
-                          unit.number,
-                          topic
-                        ).then((lessons) => {
-                          nextLessonId = lessons[0].lesson_id;
-                          topic.lesson_ids = lessons.map(
-                            (lesson: Lesson) => lesson.lesson_id
-                          );
-                          console.log(topic.lesson_ids);
+                        GetRoadmap(profile.user_id).then((roadmap) => {
+                          console.log(roadmap);
+                          if (roadmap != null) {
+                            GetUnit(
+                              profile.user_id,
+                              subject,
+                              unitNumber + 1
+                            ).then((nextUnit: Unit) => {
+                              if (nextUnit != null) {
+                                const nextTopic_id = nextUnit.topic_ids[0];
+                                GetRowFromTable(
+                                  profile.user_id,
+                                  "Topics",
+                                  nextTopic_id,
+                                  "topic_id"
+                                ).then((topic) => {
+                                  console.log(topic);
+                                  GenerateLessonsAndUpload(
+                                    profile,
+                                    topic.subject,
+                                    nextUnit.number,
+                                    topic
+                                  ).then((lessons) => {
+                                    nextLessonId = lessons[0].lesson_id;
+                                    topic.lesson_ids = lessons.map(
+                                      (lesson: Lesson) => lesson.lesson_id
+                                    );
+                                    updateTopicRowInTable(
+                                      profile.user_id,
+                                      topic,
+                                      topic.topic_id
+                                    );
+                                    profileUpdated.current_lesson_ids =
+                                      profileUpdated.current_lesson_ids?.filter(
+                                        (lesson_id) => lesson_id != idToRemove
+                                      ) || null;
+                                    profileUpdated.current_lesson_ids?.push(
+                                      nextLessonId
+                                    );
+                                    updateRowInTable(
+                                      profile.user_id,
+                                      profileUpdated,
+                                      "profiles"
+                                    ).then(() => {
+                                      router.replace("/dashboard");
+                                    });
+                                  });
+                                });
+                              }
+                            });
+                          }
+                        });
+                      } else {
+                        GetRowFromTable(
+                          profile.user_id,
+                          "Topics",
+                          nextTopicId,
+                          "topic_id"
+                        ).then((topic) => {
                           console.log(topic);
-                          updateTopicRowInTable(
-                            profile.user_id,
-                            topic,
-                            topic.topic_id
-                          );
-                          profileUpdated.current_lesson_ids =
-                            profileUpdated.current_lesson_ids?.filter(
-                              (lesson_id) => lesson_id != idToRemove
-                            ) || null;
-                          profileUpdated.current_lesson_ids?.push(nextLessonId);
-                          updateRowInTable(
-                            profile.user_id,
-                            profileUpdated,
-                            "profiles"
-                          ).then(() => {
-                            router.replace("/dashboard");
+                          GenerateLessonsAndUpload(
+                            profile,
+                            topic.subject,
+                            unit.number,
+                            topic
+                          ).then((lessons) => {
+                            nextLessonId = lessons[0].lesson_id;
+                            topic.lesson_ids = lessons.map(
+                              (lesson: Lesson) => lesson.lesson_id
+                            );
+                            console.log(topic.lesson_ids);
+                            console.log(topic);
+                            updateTopicRowInTable(
+                              profile.user_id,
+                              topic,
+                              topic.topic_id
+                            );
+                            profileUpdated.current_lesson_ids =
+                              profileUpdated.current_lesson_ids?.filter(
+                                (lesson_id) => lesson_id != idToRemove
+                              ) || null;
+                            profileUpdated.current_lesson_ids?.push(
+                              nextLessonId
+                            );
+                            updateRowInTable(
+                              profile.user_id,
+                              profileUpdated,
+                              "profiles"
+                            ).then(() => {
+                              router.replace("/dashboard");
+                            });
                           });
                         });
-                      });
+                      }
                     }
                   );
                 } else {

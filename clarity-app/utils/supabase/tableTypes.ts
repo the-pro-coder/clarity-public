@@ -45,7 +45,7 @@ export type Unit = {
 
 export type Roadmap = {
   user_id: string;
-  unit_ids: string[];
+  unit_ids: { subject: string; ids: string[] }[];
 };
 
 export type LessonSection = {

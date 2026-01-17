@@ -2,6 +2,7 @@
 import {
   Lesson,
   LessonSection,
+  Roadmap,
   Topic,
   Unit,
 } from "@/utils/supabase/tableTypes";
@@ -128,6 +129,15 @@ export async function GetRowFromTable(
       .eq("user_id", user_id);
     if (!error) return data[0];
   }
+}
+
+export async function GetRoadmap(user_id: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("Roadmaps")
+    .select("*")
+    .eq("user_id", user_id);
+  if (!error) return data;
 }
 
 export async function InsertRowInTable(dataToInsert: object, table: string) {
@@ -313,6 +323,18 @@ You MUST output exactly this JSON shape (no extra properties):
     console.log(unitToUpload);
     await InsertRowInTable(unitToUpload, "units");
   }
+  const unitIds: { subject: string; ids: string[] }[] = [];
+  for (const subject of profile.interest_areas) {
+    const subjectsUnitIds = units.filter(
+      (unit: Unit) => unit.subject == subject
+    );
+    unitIds.push({ subject: subject, ids: subjectsUnitIds });
+  }
+  const roadmap: Roadmap = {
+    unit_ids: unitIds,
+    user_id: profile.user_id,
+  };
+  await InsertRowInTable(roadmap, "Roadmaps");
   // console.log(units);
 }
 
@@ -444,6 +466,7 @@ Per-type requirements:
   - There should be only 1 strictly best answer, not multiple possible acceptable answers.
   - Question shouldn't be too long.
   - Question should be related and take into consideration to address understanding of any of the previous theory sections, best the closest theory section to this section.
+  - practice section shouldn't contain any format asterisks nor format brackets.
   - "explanation" must justify why that option is correct in a clear, short, concise way.
 - creativity:
   - "tips" must contain 3-6 tips.
@@ -452,6 +475,7 @@ Per-type requirements:
   - "tips" shouldn't reveal the answer for the task, but give enlightment.
   - assignment shouldn't be too tedious and should be fun, short and challenging.
   - assignment should take into account the user will only be able to respond in text.
+  - creativity section shouldn't contain any format asterisks nor format brackets.
   - "minCharacters" must be between 20 and 500.
 
 Time requirement:
@@ -905,7 +929,9 @@ Section count control:
       .replaceAll("\\", "") || ""
   );
   const lessons = lessons_data["lessons"].map((lesson_data: Lesson) => {
-    const lessonID = generateId("lesson");
+    const lessonID = generateId(
+      `lesson_${subject.substring(0, 3).toUpperCase()}`
+    );
     const lesson: Lesson = {
       user_id: profile.user_id,
       subject: subject,
