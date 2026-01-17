@@ -22,7 +22,7 @@ import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { Profile } from "@/utils/supabase/tableTypes";
 import capitalize from "@/components/custom/util/Capitalize";
 
-const interestAreasDB = ["math", "english"];
+const interestAreasDB = ["math", "english", "dark psychology"];
 const numberDB = ["one", "two", "three", "four"];
 
 export default function GetStarted() {

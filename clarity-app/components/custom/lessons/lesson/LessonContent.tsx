@@ -17,6 +17,7 @@ import {
 } from "@/app/dashboard/action";
 import { Lesson, Profile, Roadmap, Unit } from "@/utils/supabase/tableTypes";
 import GeneratingContent from "../../prefabs/Loading Screen/GeneratingContent";
+import { DiamondIcon } from "lucide-react";
 
 export default function LessonContent({
   lesson,
@@ -245,6 +246,24 @@ export default function LessonContent({
             });
           }}
         />
+        <div className="flex w-full mb-3 justify-center gap-2">
+          {lesson.category != "diagnostic" &&
+            lesson.lesson_sections.map((l, i) => {
+              return (
+                <DiamondIcon
+                  key={i}
+                  size={35}
+                  className={`${
+                    l.status == "completed"
+                      ? "fill-emerald-400 border-emerald-400"
+                      : l.status == "incorrect"
+                      ? "fill-yellow-400"
+                      : ""
+                  }`}
+                />
+              );
+            })}
+        </div>
         {isGenerating && <GeneratingContent />}
       </section>
     );

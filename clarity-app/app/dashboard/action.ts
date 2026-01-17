@@ -410,7 +410,6 @@ Rules:
 Task:
 Generate the content for each lesson section in the input lesson.sections list.
 Do NOT add, remove, reorder, or rename sections.
-Only Theory section is allowed to use special notation for keywords.
 Each output item must follow the correct shape for its "type".
 
 Input lesson sections (JSON):
@@ -466,7 +465,6 @@ Per-type requirements:
   - There should be only 1 strictly best answer, not multiple possible acceptable answers.
   - Question shouldn't be too long.
   - Question should be related and take into consideration to address understanding of any of the previous theory sections, best the closest theory section to this section.
-  - practice section shouldn't contain any format asterisks nor format brackets.
   - "explanation" must justify why that option is correct in a clear, short, concise way.
 - creativity:
   - "tips" must contain 3-6 tips.
@@ -475,7 +473,6 @@ Per-type requirements:
   - "tips" shouldn't reveal the answer for the task, but give enlightment.
   - assignment shouldn't be too tedious and should be fun, short and challenging.
   - assignment should take into account the user will only be able to respond in text.
-  - creativity section shouldn't contain any format asterisks nor format brackets.
   - "minCharacters" must be between 20 and 500.
 
 Time requirement:
