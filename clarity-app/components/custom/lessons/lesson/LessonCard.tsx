@@ -2,7 +2,14 @@
 import { Card } from "@/components/ui/card";
 import { LessonSection } from "@/utils/supabase/tableTypes";
 import { LightbulbIcon, PauseIcon, PlayIcon, RotateCcw } from "lucide-react";
-import { Fragment, useEffect, useId, useState } from "react";
+import {
+  Dispatch,
+  Fragment,
+  SetStateAction,
+  useEffect,
+  useId,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -53,22 +60,37 @@ export default function LessonCard({
   content,
   action,
   isLastSection,
+  isDiagnostic,
   completedCallbackAction,
   onCompletedCallbackAction,
 }: {
   section: LessonSection;
   content?: LessonSectionContent;
+  isDiagnostic: boolean;
   isLastSection: boolean;
   action: () => void;
   completedCallbackAction: () => void;
-  onCompletedCallbackAction: () => void;
+  onCompletedCallbackAction: (
+    results: { section: string; status: "correct" | "incorrect" }[],
+  ) => void;
 }) {
   const [isCompleted, setIsCompleted] = useState(false);
+  const [registry, setRegistry] = useState<
+    {
+      section: string;
+      status: "correct" | "incorrect";
+    }[]
+  >([]);
   if (content == undefined) return;
   if (isCompleted) {
     return (
       <div className="absolute w-dvw h-dvh bg-background top-0 left-0 flex">
-        <FinishedLesson onContinue={onCompletedCallbackAction} />;
+        <FinishedLesson
+          onContinue={() => {
+            onCompletedCallbackAction(registry);
+          }}
+        />
+        ;
       </div>
     );
   }
@@ -92,6 +114,9 @@ export default function LessonCard({
               setIsCompleted(true);
             }}
             isLastSection={isLastSection}
+            registry={registry}
+            setRegistry={setRegistry}
+            isDiagnostic={isDiagnostic}
             content={content}
             continueCallback={action}
             completedCallbackAction={completedCallbackAction}
@@ -103,6 +128,9 @@ export default function LessonCard({
               setIsCompleted(true);
             }}
             isLastSection={isLastSection}
+            registry={registry}
+            setRegistry={setRegistry}
+            isDiagnostic={isDiagnostic}
             content={content}
             continueCallback={action}
             completedCallbackAction={completedCallbackAction}
@@ -266,13 +294,29 @@ function TheoryCard({
 
 function PracticeCard({
   content,
+  isDiagnostic,
   continueCallback,
   isLastSection,
   completedCallbackAction,
   onFinishedCallback,
+  registry,
+  setRegistry,
 }: {
   content: PracticeCardContent;
+  isDiagnostic: boolean;
   isLastSection: boolean;
+  registry: {
+    section: string;
+    status: "correct" | "incorrect";
+  }[];
+  setRegistry: Dispatch<
+    SetStateAction<
+      {
+        section: string;
+        status: "correct" | "incorrect";
+      }[]
+    >
+  >;
   continueCallback: () => void;
   completedCallbackAction: (value?: "completed" | "incomplete") => void;
   onFinishedCallback: () => void;
@@ -284,7 +328,7 @@ function PracticeCard({
     "correct" | "incorrect" | "idle"
   >("idle");
   function checkAnswer() {
-    if (answerStatus == "correct") {
+    if (answerStatus == "correct" || (isDiagnostic && answerStatus != "idle")) {
       if (isLastSection) {
         onFinishedCallback();
       } else {
@@ -299,11 +343,57 @@ function PracticeCard({
     }
     const correct = content.answers[selectedAnswer].correct;
     setAnswerStatus(() => (correct ? "correct" : "incorrect"));
-    completedCallbackAction(correct ? "completed" : "incomplete");
+    if (
+      registry.find((el) => {
+        return el.section == content.question;
+      }) == undefined
+    ) {
+      setRegistry((prev) => {
+        console.log([
+          ...prev,
+          {
+            section: content.question,
+            status: correct ? "correct" : "incorrect",
+          },
+        ]);
+        return [
+          ...prev,
+          {
+            section: content.question,
+            status: correct ? "correct" : "incorrect",
+          },
+        ];
+      });
+    }
+    completedCallbackAction(
+      correct || isDiagnostic ? "completed" : "incomplete",
+    );
   }
+  const tokens = content.question.match(/\[[^\]]+\]|\*\*[^*]+\*\*|\S+/g);
   return (
     <div className="flex flex-col gap-5 max-sm:gap-2">
-      <h2 className="font-bold text-2xl max-sm:text-xl">{content.question}</h2>
+      <h2 className="font-bold text-2xl max-sm:text-xl">
+        {tokens?.map((token, k) => {
+          if (token.includes("[")) {
+            return (
+              <span key={k} className={`transition-colors font-bold`}>
+                {` ${token
+                  .replaceAll("[", "")
+                  .replaceAll("]", "")
+                  .replaceAll("*", "")}`}
+              </span>
+            );
+          } else if (token.includes("*")) {
+            return (
+              <span key={k} className={`transition-colors font-bold`}>
+                {` ${token.replaceAll("*", "")}`}
+              </span>
+            );
+          } else {
+            return <span key={k}>{` ${token}`}</span>;
+          }
+        })}
+      </h2>
       <RadioGroup
         disabled={answerStatus != "idle"}
         className="flex flex-col"
@@ -320,8 +410,8 @@ function PracticeCard({
                 selectedAnswer == i
                   ? "text-primary bg-blue-100 border-primary"
                   : answerStatus == "idle"
-                  ? "hover:bg-accent"
-                  : ""
+                    ? "hover:bg-accent"
+                    : ""
               } ${
                 selectedAnswer == i && answerStatus == "correct"
                   ? "bg-emerald-100 border-emerald-400 "
@@ -348,8 +438,8 @@ function PracticeCard({
           answerStatus == "idle"
             ? "hidden"
             : answerStatus == "correct"
-            ? "bg-emerald-100 text-emerald-400"
-            : "bg-orange-100 text-orange-400"
+              ? "bg-emerald-100 text-emerald-400"
+              : "bg-orange-100 text-orange-400"
         }`}
       >
         {answerStatus == "correct" && (
@@ -375,7 +465,7 @@ function PracticeCard({
           onClick={checkAnswer}
         >
           {answerStatus != "idle"
-            ? answerStatus == "correct"
+            ? answerStatus == "correct" || isDiagnostic
               ? !isLastSection
                 ? "Continue"
                 : "Finish"
@@ -392,11 +482,27 @@ function CreativityCard({
   continueCallback,
   isLastSection,
   completedCallbackAction,
+  registry,
+  setRegistry,
+  isDiagnostic,
   onFinishedCallback,
 }: {
   content: CreativityCardContent;
   continueCallback: () => void;
   isLastSection: boolean;
+  isDiagnostic: boolean;
+  registry: {
+    section: string;
+    status: "correct" | "incorrect";
+  }[];
+  setRegistry: Dispatch<
+    SetStateAction<
+      {
+        section: string;
+        status: "correct" | "incorrect";
+      }[]
+    >
+  >;
   completedCallbackAction: (value: "completed" | "incorrect") => void;
   onFinishedCallback: () => void;
 }) {
@@ -409,10 +515,13 @@ function CreativityCard({
   const [explanation, setExplanation] = useState("");
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   function checkAnswer() {
-    if (answerStatus == "incorrect") {
+    if (answerStatus == "incorrect" && !isDiagnostic) {
       setAnswerStatus("idle");
       setExplanation("");
-    } else if (answerStatus == "correct") {
+    } else if (
+      answerStatus == "correct" ||
+      (isDiagnostic && answerStatus != "idle")
+    ) {
       if (isLastSection) {
         onFinishedCallback();
       } else {
@@ -429,13 +538,38 @@ function CreativityCard({
       if (!textAreaRef.current?.value) return;
       GradeCreativityAnswer(
         content.instructions,
-        textAreaRef.current.value
+        textAreaRef.current.value,
       ).then((data) => {
         const result = data;
         setAnswerStatus(result.status);
         setExplanation(result.feedback);
+        if (
+          registry.find((el) => {
+            return el.section == content.instructions;
+          }) == undefined
+        ) {
+          setRegistry((prev) => {
+            console.log([
+              ...prev,
+              {
+                section: content.instructions,
+                status: result.status == "correct" ? "correct" : "incorrect",
+              },
+            ]);
+            return [
+              ...prev,
+              {
+                section: content.instructions,
+                status: result.status == "correct" ? "correct" : "incorrect",
+              },
+            ];
+          });
+        }
+        console.log(registry);
         completedCallbackAction(
-          result.status == "correct" ? "completed" : "incorrect"
+          result.status == "correct" || isDiagnostic
+            ? "completed"
+            : "incorrect",
         );
       });
     }
@@ -516,8 +650,8 @@ function CreativityCard({
             answerStatus == "idle"
               ? "hidden"
               : answerStatus == "correct"
-              ? "bg-emerald-100 text-emerald-400"
-              : "bg-orange-100 text-orange-400"
+                ? "bg-emerald-100 text-emerald-400"
+                : "bg-orange-100 text-orange-400"
           }`}
         >
           {answerStatus == "correct" && (
@@ -542,11 +676,11 @@ function CreativityCard({
           >
             {answerStatus == "idle"
               ? "Check answer"
-              : answerStatus == "correct"
-              ? isLastSection
-                ? "Finish"
-                : "Continue"
-              : "Retry"}
+              : answerStatus == "correct" || isDiagnostic
+                ? isLastSection
+                  ? "Finish"
+                  : "Continue"
+                : "Retry"}
           </Button>
         </div>
       </div>

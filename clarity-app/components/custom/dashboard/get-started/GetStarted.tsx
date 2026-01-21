@@ -256,7 +256,7 @@ export default function GetStarted() {
                 </label>
                 <Select
                   onValueChange={(
-                    value: "confident" | "okay" | "struggle" | "deficient"
+                    value: "confident" | "okay" | "struggle" | "deficient",
                   ) => {
                     const craftedValue = { area: area, status: value };
                     setConfidenceStatus((prev) => [...prev, craftedValue]);
@@ -305,6 +305,7 @@ export default function GetStarted() {
           dedication_time: dedicationTime || "",
           interest_areas: interestAreas,
           confidence_status: confidenceStatus,
+          opportunity_areas: [],
         };
         supabase
           .from("Profiles")
@@ -363,7 +364,7 @@ export default function GetStarted() {
                       "Please fill out all the required fields",
                       {
                         position: "top-center",
-                      }
+                      },
                     );
                   }
                 } else {
@@ -386,7 +387,7 @@ export default function GetStarted() {
                       "Please fill out all the required fields",
                       {
                         position: "top-center",
-                      }
+                      },
                     );
                   }
                 }

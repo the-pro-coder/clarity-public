@@ -18,6 +18,13 @@ export type Profile = {
   current_lesson_ids: string[] | null;
   confidence_status: { area: string; status: string }[];
   grade_level: string;
+  opportunity_areas: {
+    subject: string;
+    area: string;
+    suggestedExercisesTopic: string;
+    improvementRequirements: string;
+    lesson_id: string;
+  }[];
 };
 
 export type Preferences = {
@@ -71,7 +78,8 @@ export type Lesson = {
     | "default"
     | "analysis"
     | "hands-on practice"
-    | "diagnostic";
+    | "diagnostic"
+    | "improvement";
   tags: string[];
   status: "not started" | "completed" | "in progress";
   percentage_completed: number;

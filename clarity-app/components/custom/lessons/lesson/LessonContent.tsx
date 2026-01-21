@@ -6,6 +6,7 @@ import LessonCard from "./LessonCard";
 import { useRouter } from "next/navigation";
 import {
   GenerateLessonsAndUpload,
+  GenerateOpportunityAreas,
   GenerateRoadmap,
   GetRoadmap,
   GetRowFromTable,
@@ -31,16 +32,16 @@ export default function LessonContent({
     lesson.lesson_sections.find(
       (section, i) =>
         section.status == "not started" ||
-        i == lesson.lesson_sections.length - 1
-    )
+        i == lesson.lesson_sections.length - 1,
+    ),
   );
   const [isGenerating, setIsGenerating] = useState(false);
   function SetSectionAsCompleted(
-    value: "completed" | "incomplete" = "completed"
+    value: "completed" | "incomplete" = "completed",
   ) {
     if (currentSection == undefined) return;
     const section = lesson.lesson_sections.findIndex(
-      (section) => section.section_id == currentSection.section_id
+      (section) => section.section_id == currentSection.section_id,
     );
     if (section != -1 && currentSection != undefined) {
       const newLesson: Lesson = { ...lesson };
@@ -55,10 +56,10 @@ export default function LessonContent({
       }
       newLesson.percentage_completed = Math.floor(
         (newLesson.lesson_sections.filter(
-          (section) => section.status == "completed"
+          (section) => section.status == "completed",
         ).length /
           newLesson.lesson_sections.length) *
-          100
+          100,
       );
       if (newLesson.status == "not started") {
         newLesson.status = "in progress";
@@ -78,153 +79,175 @@ export default function LessonContent({
           sectionType={currentSection.type}
         />
         <LessonCard
-          onCompletedCallbackAction={() => {
+          isDiagnostic={lesson.category === "diagnostic"}
+          onCompletedCallbackAction={(
+            results: { section: string; status: "correct" | "incorrect" }[],
+          ) => {
             if (lesson.topic == null) {
               setIsGenerating(true);
-              GenerateRoadmap(profile, lesson.subject).then(() => {
+              console.log(results);
+              GenerateRoadmap(profile, lesson.subject, results).then(() => {
                 router.replace("/dashboard");
               });
             } else {
               const profileUpdated = { ...profile };
-              profileUpdated.current_lesson_ids =
-                profileUpdated.current_lesson_ids?.filter((lesson_id) => {
-                  return lesson_id != lesson.lesson_id;
-                }) || null;
-              GetTopic(profile.user_id, lesson.lesson_id).then((topic) => {
-                const lessonIds = topic?.lesson_ids;
-                if (!lessonIds) return;
-                let nextLessonId =
-                  lessonIds[
-                    Math.min(
-                      lessonIds.indexOf(lesson.lesson_id) + 1,
-                      lessonIds.length - 1
-                    )
-                  ];
-                if (lesson.lesson_id === lessonIds[lessonIds.length - 1]) {
-                  // change to next topic
-                  const idToRemove = lesson.lesson_id;
-                  const subject = lesson.subject;
-                  const unitNumber = lesson.unit;
-                  GetUnit(profile.user_id, lesson.subject, lesson.unit).then(
-                    (unit) => {
-                      const topicIds = unit.topic_ids;
-                      if (!topicIds) return;
-                      const nextTopicId =
-                        topicIds[
-                          Math.min(
-                            topicIds.indexOf(topic.topic_id) + 1,
-                            topicIds.length - 1
-                          )
-                        ];
-                      if (nextTopicId == topicIds[topicIds.length - 1]) {
-                        // unit finished, change to next unit.
-                        GetRoadmap(profile.user_id).then((roadmap) => {
-                          console.log(roadmap);
-                          if (roadmap != null) {
-                            GetUnit(
-                              profile.user_id,
-                              subject,
-                              unitNumber + 1
-                            ).then((nextUnit: Unit) => {
-                              if (nextUnit != null) {
-                                const nextTopic_id = nextUnit.topic_ids[0];
-                                GetRowFromTable(
-                                  profile.user_id,
-                                  "Topics",
-                                  nextTopic_id,
-                                  "topic_id"
-                                ).then((topic) => {
-                                  console.log(topic);
-                                  GenerateLessonsAndUpload(
-                                    profile,
-                                    topic.subject,
-                                    nextUnit.number,
-                                    topic
-                                  ).then((lessons) => {
-                                    nextLessonId = lessons[0].lesson_id;
-                                    topic.lesson_ids = lessons.map(
-                                      (lesson: Lesson) => lesson.lesson_id
-                                    );
-                                    updateTopicRowInTable(
-                                      profile.user_id,
+              console.log(profileUpdated);
+              GenerateOpportunityAreas(profile, results, lesson.subject).then(
+                (data) => {
+                  if (profileUpdated.opportunity_areas.length > 0) {
+                    profileUpdated.opportunity_areas = [
+                      ...profileUpdated.opportunity_areas,
+                      ...data.opportunity_areas,
+                    ];
+                    console.log(profileUpdated);
+                  } else {
+                    profileUpdated.opportunity_areas = data.opportunity_areas;
+                    console.log(profileUpdated);
+                  }
+                  profileUpdated.current_lesson_ids =
+                    profileUpdated.current_lesson_ids?.filter((lesson_id) => {
+                      return lesson_id != lesson.lesson_id;
+                    }) || null;
+                  GetTopic(profile.user_id, lesson.lesson_id).then((topic) => {
+                    const lessonIds = topic?.lesson_ids;
+                    if (!lessonIds) return;
+                    let nextLessonId =
+                      lessonIds[
+                        Math.min(
+                          lessonIds.indexOf(lesson.lesson_id) + 1,
+                          lessonIds.length - 1,
+                        )
+                      ];
+                    if (lesson.lesson_id === lessonIds[lessonIds.length - 1]) {
+                      // change to next topic
+                      const idToRemove = lesson.lesson_id;
+                      const subject = lesson.subject;
+                      const unitNumber = lesson.unit;
+                      GetUnit(
+                        profile.user_id,
+                        lesson.subject,
+                        lesson.unit,
+                      ).then((unit) => {
+                        const topicIds = unit.topic_ids;
+                        if (!topicIds) return;
+                        const nextTopicId =
+                          topicIds[
+                            Math.min(
+                              topicIds.indexOf(topic.topic_id) + 1,
+                              topicIds.length - 1,
+                            )
+                          ];
+                        if (nextTopicId == topicIds[topicIds.length - 1]) {
+                          // unit finished, change to next unit.
+                          GetRoadmap(profile.user_id).then((roadmap) => {
+                            console.log(roadmap);
+                            if (roadmap != null) {
+                              GetUnit(
+                                profile.user_id,
+                                subject,
+                                unitNumber + 1,
+                              ).then((nextUnit: Unit) => {
+                                if (nextUnit != null) {
+                                  const nextTopic_id = nextUnit.topic_ids[0];
+                                  GetRowFromTable(
+                                    profile.user_id,
+                                    "Topics",
+                                    nextTopic_id,
+                                    "topic_id",
+                                  ).then((topic) => {
+                                    console.log(topic);
+                                    GenerateLessonsAndUpload(
+                                      profile,
+                                      topic.subject,
+                                      nextUnit.number,
                                       topic,
-                                      topic.topic_id
-                                    );
-                                    profileUpdated.current_lesson_ids =
-                                      profileUpdated.current_lesson_ids?.filter(
-                                        (lesson_id) => lesson_id != idToRemove
-                                      ) || null;
-                                    profileUpdated.current_lesson_ids?.push(
-                                      nextLessonId
-                                    );
-                                    updateRowInTable(
-                                      profile.user_id,
-                                      profileUpdated,
-                                      "profiles"
-                                    ).then(() => {
-                                      router.replace("/dashboard");
+                                    ).then((lessons) => {
+                                      nextLessonId = lessons[0].lesson_id;
+                                      topic.lesson_ids = lessons.map(
+                                        (lesson: Lesson) => lesson.lesson_id,
+                                      );
+                                      updateTopicRowInTable(
+                                        profile.user_id,
+                                        topic,
+                                        topic.topic_id,
+                                      );
+                                      profileUpdated.current_lesson_ids =
+                                        profileUpdated.current_lesson_ids?.filter(
+                                          (lesson_id) =>
+                                            lesson_id != idToRemove,
+                                        ) || null;
+                                      profileUpdated.current_lesson_ids?.push(
+                                        nextLessonId,
+                                      );
+                                      updateRowInTable(
+                                        profile.user_id,
+                                        profileUpdated,
+                                        "profiles",
+                                      ).then(() => {
+                                        router.replace("/dashboard");
+                                      });
                                     });
                                   });
-                                });
-                              }
-                            });
-                          }
-                        });
-                      } else {
-                        GetRowFromTable(
-                          profile.user_id,
-                          "Topics",
-                          nextTopicId,
-                          "topic_id"
-                        ).then((topic) => {
-                          console.log(topic);
-                          GenerateLessonsAndUpload(
-                            profile,
-                            topic.subject,
-                            unit.number,
-                            topic
-                          ).then((lessons) => {
-                            nextLessonId = lessons[0].lesson_id;
-                            topic.lesson_ids = lessons.map(
-                              (lesson: Lesson) => lesson.lesson_id
-                            );
-                            console.log(topic.lesson_ids);
+                                }
+                              });
+                            }
+                          });
+                        } else {
+                          GetRowFromTable(
+                            profile.user_id,
+                            "Topics",
+                            nextTopicId,
+                            "topic_id",
+                          ).then((topic) => {
                             console.log(topic);
-                            updateTopicRowInTable(
-                              profile.user_id,
+                            GenerateLessonsAndUpload(
+                              profile,
+                              topic.subject,
+                              unit.number,
                               topic,
-                              topic.topic_id
-                            );
-                            profileUpdated.current_lesson_ids =
-                              profileUpdated.current_lesson_ids?.filter(
-                                (lesson_id) => lesson_id != idToRemove
-                              ) || null;
-                            profileUpdated.current_lesson_ids?.push(
-                              nextLessonId
-                            );
-                            updateRowInTable(
-                              profile.user_id,
-                              profileUpdated,
-                              "profiles"
-                            ).then(() => {
-                              router.replace("/dashboard");
+                            ).then((lessons) => {
+                              nextLessonId = lessons[0].lesson_id;
+                              topic.lesson_ids = lessons.map(
+                                (lesson: Lesson) => lesson.lesson_id,
+                              );
+                              console.log(topic.lesson_ids);
+                              console.log(topic);
+                              updateTopicRowInTable(
+                                profile.user_id,
+                                topic,
+                                topic.topic_id,
+                              );
+                              profileUpdated.current_lesson_ids =
+                                profileUpdated.current_lesson_ids?.filter(
+                                  (lesson_id) => lesson_id != idToRemove,
+                                ) || null;
+                              profileUpdated.current_lesson_ids?.push(
+                                nextLessonId,
+                              );
+                              updateRowInTable(
+                                profile.user_id,
+                                profileUpdated,
+                                "profiles",
+                              ).then(() => {
+                                router.replace("/dashboard");
+                              });
                             });
                           });
-                        });
-                      }
+                        }
+                      });
+                    } else {
+                      profileUpdated.current_lesson_ids?.push(nextLessonId);
+                      updateRowInTable(
+                        profile.user_id,
+                        profileUpdated,
+                        "profiles",
+                      ).then(() => {
+                        router.replace("/dashboard");
+                      });
                     }
-                  );
-                } else {
-                  profileUpdated.current_lesson_ids?.push(nextLessonId);
-                  updateRowInTable(
-                    profile.user_id,
-                    profileUpdated,
-                    "profiles"
-                  ).then(() => {
-                    router.replace("/dashboard");
                   });
-                }
-              });
+                },
+              );
             }
           }}
           section={currentSection}
@@ -237,7 +260,7 @@ export default function LessonContent({
           action={() => {
             setCurrentSection((prev) => {
               const currentSectionIndex = lesson.lesson_sections.findIndex(
-                (section) => section == currentSection
+                (section) => section == currentSection,
               );
               if (currentSectionIndex + 1 < lesson.lesson_sections.length) {
                 return lesson.lesson_sections[currentSectionIndex + 1];
@@ -257,8 +280,8 @@ export default function LessonContent({
                     l.status == "completed"
                       ? "fill-emerald-400 border-emerald-400"
                       : l.status == "incorrect"
-                      ? "fill-yellow-400"
-                      : ""
+                        ? "fill-yellow-400"
+                        : ""
                   }`}
                 />
               );

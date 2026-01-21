@@ -13,7 +13,7 @@ import { User, Preferences, Profile } from "@/utils/supabase/tableTypes";
 import { redirect } from "next/navigation";
 async function alreadyInsertedRow(
   table: string,
-  user_id: string
+  user_id: string,
 ): Promise<boolean> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -33,7 +33,7 @@ async function alreadyInsertedRow(
 async function InsertRow(
   user_id: string,
   table: string,
-  data_to_insert: Profile | User | Preferences
+  data_to_insert: Profile | User | Preferences,
 ) {
   const supabase = await createClient();
   const inserted = await alreadyInsertedRow(table, user_id);
@@ -58,14 +58,14 @@ export async function Setup(user: { id: string; email: string }) {
     const preferencesResponse = await InsertRow(
       user?.id || "",
       "preferences",
-      preferencesDataToInsert
+      preferencesDataToInsert,
     );
     if (preferencesResponse?.error) {
       throw preferencesResponse.error.message;
     }
     const alreadyInsertedProfile = await alreadyInsertedRow(
       "profiles",
-      user?.id || ""
+      user?.id || "",
     );
     if (!alreadyInsertedProfile) redirect("/dashboard/get-started");
     const supabase = await createClient();
@@ -96,7 +96,7 @@ export async function GetTopic(user_id: string, lesson_id: string) {
 export async function GetUnit(
   user_id: string,
   subject: string,
-  number: number
+  number: number,
 ) {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -112,7 +112,7 @@ export async function GetRowFromTable(
   user_id: string,
   table: string,
   identifier?: string,
-  identifierKey?: string
+  identifierKey?: string,
 ) {
   const supabase = await createClient();
   if (identifier && identifierKey) {
@@ -145,23 +145,25 @@ export async function InsertRowInTable(dataToInsert: object, table: string) {
   const { data, error } = await supabase
     .from(`${capitalize(table)}`)
     .insert(dataToInsert);
+  if (!error) return data;
 }
 export async function updateRowInTable(
   user_id: string,
   dataToInsert: object,
-  table: string
+  table: string,
 ) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from(`${capitalize(table)}`)
     .update(dataToInsert)
     .eq("user_id", user_id);
+  if (!error) return data;
 }
 
 export async function updateTopicRowInTable(
   user_id: string,
   dataToInsert: object,
-  topic_id: string
+  topic_id: string,
 ) {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -194,7 +196,7 @@ export async function GetLessons(user_id: string, lesson_ids: string[]) {
 
 export async function UpdateLessonSections(
   lesson_id: string,
-  new_lesson_sections: Lesson
+  new_lesson_sections: Lesson,
 ) {
   const supabase = await createClient();
   await supabase
@@ -208,10 +210,77 @@ export async function UpdateLessonSections(
     .eq("lesson_id", lesson_id);
 }
 
+export async function GenerateOpportunityAreas(
+  profile: Profile,
+  lessonResults: { section: string; status: "correct" | "incorrect" }[],
+  subject: string,
+) {
+  const model_instructions = `
+Return ONLY a single valid JSON object.
+No markdown. No code fences. No comments. No extra keys. No trailing text.
+The first character must be "{" and the last character must be "}".
+All strings must use double quotes.
+`;
+
+  const model_prompt = `
+Task:
+Generate all the opportunity areas for the subject of ${subject} based on the wrong answers in the input lesson results list.
+Do NOT add, remove, reorder, or rename sections.
+Each item must follow the correct shape.
+AVOID COMPLETELY adding opportunity areas similar or equal in topic to those existing already in the user profile. 
+Generate one opportunity area for each wrong answer.
+
+Input lesson results (JSON):
+${JSON.stringify(lessonResults)}
+
+User profile (JSON):
+${JSON.stringify(profile)}
+
+Output schema (MUST match exactly; no extra properties):
+{
+  opportunity_areas: [ {
+    subject: string,
+    area: string,
+    suggestedExercisesTopic: string,
+    improvementRequirements: string,
+    }
+  ]
+}
+
+Hard rules:
+- length of opportunity_areas MUST equal ${
+    lessonResults.filter(({ status }) => {
+      return status == "incorrect";
+    }).length
+  }.
+- for each opportunity area inside opportunity_areas, the improvementRequirements field should contain the things needed to improve according to the other fields.
+
+Silent self-check before output:
+- Valid JSON? Single object?
+- All Hard rules followed correctly?
+- Length matches input and types match by index?
+- Each item matches its type schema and constraints?
+Fix silently and output ONLY the final JSON object.
+`;
+  const opportunity_areas_data_raw = await PromptModel(
+    model_instructions,
+    model_prompt,
+  );
+  const opportunity_areas_data = JSON.parse(
+    opportunity_areas_data_raw.content
+      ?.substring(
+        opportunity_areas_data_raw.content?.indexOf("{"),
+        opportunity_areas_data_raw.content?.lastIndexOf("}") + 1,
+      )
+      .replaceAll("\n", "") || "",
+  );
+  return opportunity_areas_data;
+}
+
 export async function GenerateRoadmap(
   profile: Profile,
   subject: string,
-  diagnosticResults?: object
+  diagnosticResults?: object,
 ) {
   console.log("Generating roadmap");
   const model_instructions = `
@@ -223,9 +292,18 @@ All strings must use double quotes.
   const model_prompt = `Generate a roadmap for subject: "${subject}".
 User profile (JSON):
 ${JSON.stringify(profile)}
+${
+  diagnosticResults != null
+    ? `
+User results in diagnostic exam (JSON):
+${diagnosticResults}
+  `
+    : ""
+}
 
 Constraints:
 - Create 7 to 9 units.
+- Take into consideration the user's understanding level according to their profile and their diagnostic exam so they can catch up.
 - Each unit must have 1-3 one/two worded tags related with the topics it has.
 - Each unit must have 5 to 7 topics.
 - Each topic must have 1-3 one/two worded tags related with the topic.
@@ -256,21 +334,22 @@ You MUST output exactly this JSON shape (no extra properties):
   const roadmap_data_raw = await PromptModel(
     model_instructions,
     model_prompt,
-    "arcee-ai/trinity-mini:free"
+    "arcee-ai/trinity-mini:free",
   );
+  // console.log(roadmap_data_raw);
   const roadmap_data = JSON.parse(
     roadmap_data_raw.content
       ?.substring(
         roadmap_data_raw.content?.indexOf("{"),
-        roadmap_data_raw.content?.lastIndexOf("}") + 1
+        roadmap_data_raw.content?.lastIndexOf("}") + 1,
       )
-      .replaceAll("\n", "") || ""
+      .replaceAll("\n", "") || "",
   );
   const firstTopicLessons: Lesson[] = await GenerateLessons(
     profile,
     subject,
     1,
-    roadmap_data["units"][0]["topics"][0]
+    roadmap_data["units"][0]["topics"][0],
   );
   for (const lesson of firstTopicLessons) {
     await InsertRowInTable(lesson, "lessons");
@@ -326,7 +405,7 @@ You MUST output exactly this JSON shape (no extra properties):
   const unitIds: { subject: string; ids: string[] }[] = [];
   for (const subject of profile.interest_areas) {
     const subjectsUnitIds = units.filter(
-      (unit: Unit) => unit.subject == subject
+      (unit: Unit) => unit.subject == subject,
     );
     unitIds.push({ subject: subject, ids: subjectsUnitIds });
   }
@@ -340,7 +419,7 @@ You MUST output exactly this JSON shape (no extra properties):
 
 export async function GradeCreativityAnswer(
   instructions: string,
-  answer: string
+  answer: string,
 ): Promise<{ status: "correct" | "incorrect"; feedback: string }> {
   const model_instructions = `
 You are a JSON-only function.
@@ -387,8 +466,8 @@ If anything fails, fix it and output only the corrected JSON object.
   const status_data = JSON.parse(
     status_data_raw.content?.substring(
       status_data_raw.content?.indexOf("{"),
-      status_data_raw.content?.lastIndexOf("}") + 1
-    ) || ""
+      status_data_raw.content?.lastIndexOf("}") + 1,
+    ) || "",
   );
   return { status: status_data.status, feedback: status_data.feedback };
 }
@@ -408,76 +487,78 @@ Rules:
 
   const model_prompt = `
 Task:
-Generate the content for each lesson section in the input lesson.sections list.
+Generate the content for each lesson section in the input lesson sections list.
 Do NOT add, remove, reorder, or rename sections.
-Each output item must follow the correct shape for its "type".
+NEVER SKIP any lessonSectionsContent generation.
 
 Input lesson sections (JSON):
 ${JSON.stringify(lesson.lesson_sections)}
 
+Types by index (JSON) (COPY THESE EXACTLY):
+${JSON.stringify(lesson.lesson_sections.map((section) => section.type))}
+
 User profile (JSON):
 ${JSON.stringify(profile)}
 
-Output schema (MUST match exactly; no extra properties):
+Output MUST be a single JSON object with EXACTLY these top-level keys:
 {
-  "approxDurationMinutes": 0,
-  "lessonSectionsContent": [
-    {
-      "type": "theory",
-      "sentences": [""],
-    },
-    {
-      "type": "practice",
-      "question": "",
-      "explanation": "",
-      "answers": [
-        { "text": "", "correct": false }
-      ]
-    },
-    {
-      "type": "creativity",
-      "instructions": "",
-      "tips": [""],
-      "minCharacters": 50
-    }
-  ]
+  "approxDurationMinutes": number,
+  "lessonSectionsContent": array length ${lesson.lesson_sections.length}
+}
+
+Allowed section object shapes by type (NO OTHER KEYS ALLOWED):
+
+Type "theory":
+{ "type": "theory", "sentences": string[] }
+
+Type "practice":
+{
+  "type": "practice",
+  "question": string,
+  "explanation": string,
+  "answers": [ { "text": string, "correct": boolean } ]
+}
+
+Type "creativity":
+{
+  "type": "creativity",
+  "instructions": string,
+  "tips": string[],
+  "minCharacters": number
 }
 
 Hard rules:
 - lessonSectionsContent.length MUST equal ${lesson.lesson_sections.length}.
-- For each index i:
-  - lessonSectionsContent[i].type MUST equal the input section's type at index i.
-  - The object MUST include only the fields allowed for that type (no extra keys).
+- For each index i: lessonSectionsContent[i].type MUST equal Types by index[i].
+- Never output a type that is not exactly the one at that index.
+- Never output multiple objects for a single input index.
+- Each item object MUST include only the keys allowed for its type.
 
 Per-type requirements:
-- theory:
-  - "sentences" must contain 3-6 short, clear sentences.
-  - "sentences" should have an explanatory order for the section.
-  - "sentences" should wrap around double asterisks (**text**) specific content to highlight, and around brackets single keywords ([keyword])
-  - "sentences" should go in a slow pace and explain clearly all concept words involved.
-  - "sentences" should may be a step by step breakdown if the lesson type requires to (procedimental lessons).
-  - "sentences" should address the most important points of the section for an appropriate learning.
-  - "sentences" should include examples for better understanding of concepts.
-  - "sentences" shouldn't dismiss a key subject without explaining why/how it can be achieved.
-- practice:
-  - "answers" must contain 4-6 options.
-  - Exactly 1 answer must have "correct": true.
-  - There should be only 1 strictly best answer, not multiple possible acceptable answers.
-  - Question shouldn't be too long.
-  - Question should be related and take into consideration to address understanding of any of the previous theory sections, best the closest theory section to this section.
-  - "explanation" must justify why that option is correct in a clear, short, concise way.
-- creativity:
-  - "tips" must contain 3-6 tips.
-  - Ensure to provide all the needed materials for the task (paragraph, problem, or whatever you're asking for)
-  - "tips" shouldn't be a direct correct answer to the assignment.
-  - "tips" shouldn't reveal the answer for the task, but give enlightment.
-  - assignment shouldn't be too tedious and should be fun, short and challenging.
-  - assignment should take into account the user will only be able to respond in text.
-  - "minCharacters" must be between 20 and 500.
+
+theory:
+- "sentences" must contain 3-6 short, clear sentences.
+- Explanatory order; slow pace; define concept words involved.
+- Include examples.
+- Highlight content with **double asterisks** and single keywords in [brackets].
+
+practice:
+- "answers" must contain 4-6 options.
+- Exactly 1 answer must have "correct": true.
+- Only 1 strictly best answer.
+- Question not too long; related to the closest earlier theory section.
+- "explanation" concise and justifies why the correct option is correct.
+
+creativity:
+- "tips" must contain 3-6 tips.
+- Provide all needed materials for the task in "instructions".
+- Tips must not reveal the answer; only helpful guidance.
+- Task should be fun, short, challenging; user responds in text only.
+- "minCharacters" must be between 20 and 500.
 
 Time requirement:
-- approxDurationMinutes must be a realistic total estimate based on section count and difficulty.
-- Use roughly 1-3 minutes per section (harder sections → higher within that range), (theory sections aprox. 0.5 minutes each, practice sections 1-2 minutes each, and creativity sections 2-4 minutes each).
+- approxDurationMinutes must be realistic total estimate.
+- Guidance: theory ~0.5 min each, practice 1-2 min each, creativity 2-4 min each.
 - Do not output extreme times.
 
 Silent self-check before output:
@@ -492,8 +573,8 @@ Fix silently and output ONLY the final JSON object.
   const sections_content = JSON.parse(
     sections_data_raw.content?.substring(
       sections_data_raw.content?.indexOf("{"),
-      sections_data_raw.content?.lastIndexOf("}") + 1
-    ) || ""
+      sections_data_raw.content?.lastIndexOf("}") + 1,
+    ) || "",
   );
   lesson.lesson_sections = lesson.lesson_sections.map((lesson_section, i) => {
     const section = {
@@ -507,10 +588,125 @@ Fix silently and output ONLY the final JSON object.
   return lesson;
 }
 
+export async function GenerateCustomLesson(
+  profile: Profile,
+  opportunity_area: {
+    subject: string;
+    area: string;
+    suggestedExercisesTopic: string;
+    improvementRequirements: string;
+  },
+) {
+  const model_instructions = `
+You are a JSON-only generator.
+
+Rules:
+- Return ONLY a single valid JSON object.
+- No markdown, code fences, comments, or extra text.
+- The first character must be "{" and the last character must be "}".
+- Use double quotes for all keys and string values.
+- Output must match the schema exactly and must not include extra keys.
+- Do not mention any medical conditions or diagnoses.
+`;
+
+  const model_prompt = `
+Task:
+Generate ONE lesson for subject: "${opportunity_area.subject}", targeting to improve a student's performance in ${opportunity_area.area}.
+
+The suggested exercises topic is ${opportunity_area.suggestedExercisesTopic}
+Target to help the student improve the following: ${opportunity_area.improvementRequirements}
+
+Student profile (JSON):
+${JSON.stringify(profile)}
+
+Lesson requirements:
+- Short but complete titles and descriptions.
+- Create 3 to 5 lesson sections.
+- Choose section types deliberately for completeness (intro → practice → reinforcement).
+- Distribution is a soft target, but MUST satisfy these hard constraints:
+  - At least 1 "practice" section.
+  - At least 1 "creativity" section. (required)
+  - "theory" is optional.
+- If lesson_sections length is 3: include exactly 1 creativity + at least 1 practice.
+- If length is 4-5: include 1-2 creativity and 1-3 practice (rest theory if needed).
+- Keep difficulty reasonable; steps should be clear and doable.
+- Prefer 4 or 5 lesson sections when the content reasonably allows it.
+- Use only 3 sections if the lesson would become repetitive or bloated with more.
+- Across the generated lessons, avoid always using the same section count.
+
+Output schema (EXACT, no extra properties):
+{
+  "unit": "",
+  "topic": "",
+  "title": "",
+  "tags": [""],
+  "expected_learning": "",
+  "lesson_sections": [
+    { "type": "theory", "title": "", "exp": 10 }
+  ]
+}
+
+Constraints:
+- tags: 1 to 4 items.
+- lesson_sections: 3 to 5 items.
+- type: one of "theory", "practice", "creativity".
+- exp: integer 10 to 100 (reflect difficulty).
+- Section titles: 2-7 words, specific and action-oriented.
+
+Silent self-check before output:
+- Valid JSON? One object only?
+- Only allowed keys?
+- tags count 1-4?
+- lesson_sections count 3-5?
+- Contains at least 1 practice AND at least 1 creativity?
+- type values valid and exp integers valid?
+Fix silently and output only the corrected JSON.
+`;
+  const lesson_data_raw = await PromptModel(model_instructions, model_prompt);
+  const lesson_data = JSON.parse(
+    lesson_data_raw.content
+      ?.substring(
+        lesson_data_raw.content?.indexOf("{") || 0,
+        lesson_data_raw.content?.lastIndexOf("}") + 1 ||
+          lesson_data_raw.content.length - 1,
+      )
+      .replaceAll("\\", "") || "",
+  );
+  const lessonID = generateId("lesson");
+  const lesson: Lesson = {
+    user_id: profile.user_id,
+    subject: opportunity_area.subject,
+    approximate_duration: 0,
+    unit: 0,
+    topic: "",
+    title: lesson_data["title"],
+    grade: profile.grade_level,
+    tags: lesson_data["tags"] || [],
+    category: "improvement",
+    percentage_completed: 0,
+    status: "not started",
+    expected_learning: lesson_data["expected_learning"].toLowerCase(),
+    lesson_sections: lesson_data["lesson_sections"].map(
+      (section: LessonSection) => {
+        return {
+          type: section["type"],
+          title: section["title"],
+          exp: section["exp"],
+          section_id: generateId("section"),
+          lesson_id: lessonID,
+          status: "not started",
+        };
+      },
+    ),
+    lesson_id: lessonID,
+  };
+  return lesson;
+}
+
 export async function GenerateLesson(
   profile: Profile,
   subject: string,
-  type: "diagnostic" | "default"
+  type: "diagnostic" | "default",
 ) {
   let model_instructions = `
 You are a JSON-only generator.
@@ -597,7 +793,7 @@ ${JSON.stringify(profile)}
 
 Confidence status related to this subject (JSON):
 ${JSON.stringify(
-  profile.confidence_status?.filter((s) => s.area === subject) ?? []
+  profile.confidence_status?.filter((s) => s.area === subject) ?? [],
 )}
 
 Output schema (EXACT, no extra properties):
@@ -640,9 +836,9 @@ Fix silently and output only the JSON object.
       ?.substring(
         lesson_data_raw.content?.indexOf("{") || 0,
         lesson_data_raw.content?.lastIndexOf("}") + 1 ||
-          lesson_data_raw.content.length - 1
+          lesson_data_raw.content.length - 1,
       )
-      .replaceAll("\\", "") || ""
+      .replaceAll("\\", "") || "",
   );
   const lessonID = generateId("lesson");
   const lesson: Lesson = {
@@ -668,7 +864,7 @@ Fix silently and output only the JSON object.
           lesson_id: lessonID,
           status: "not started",
         };
-      }
+      },
     ),
     lesson_id: lessonID,
   };
@@ -684,7 +880,7 @@ export async function GenerateLessons(
     tags: string[];
     subject: string;
     description: string[];
-  }
+  },
 ) {
   const model_instructions = `
 You are a JSON-only generator.
@@ -779,9 +975,9 @@ Section count control:
       ?.substring(
         lessons_data_raw.content?.indexOf("{") || 0,
         lessons_data_raw.content?.lastIndexOf("}") + 1 ||
-          lessons_data_raw.content.length - 1
+          lessons_data_raw.content.length - 1,
       )
-      .replaceAll("\\", "") || ""
+      .replaceAll("\\", "") || "",
   );
   const lessons = lessons_data["lessons"].map((lesson_data: Lesson) => {
     const lessonID = generateId("lesson");
@@ -808,7 +1004,7 @@ Section count control:
             lesson_id: lessonID,
             status: "not started",
           };
-        }
+        },
       ),
       lesson_id: lessonID,
     };
@@ -826,7 +1022,7 @@ export async function GenerateLessonsAndUpload(
     tags: string[];
     subject: string;
     description: string[];
-  }
+  },
 ) {
   const model_instructions = `
 You are a JSON-only generator.
@@ -921,13 +1117,13 @@ Section count control:
       ?.substring(
         lessons_data_raw.content?.indexOf("{") || 0,
         lessons_data_raw.content?.lastIndexOf("}") + 1 ||
-          lessons_data_raw.content.length - 1
+          lessons_data_raw.content.length - 1,
       )
-      .replaceAll("\\", "") || ""
+      .replaceAll("\\", "") || "",
   );
   const lessons = lessons_data["lessons"].map((lesson_data: Lesson) => {
     const lessonID = generateId(
-      `lesson_${subject.substring(0, 3).toUpperCase()}`
+      `lesson_${subject.substring(0, 3).toUpperCase()}`,
     );
     const lesson: Lesson = {
       user_id: profile.user_id,
@@ -952,7 +1148,7 @@ Section count control:
             lesson_id: lessonID,
             status: "not started",
           };
-        }
+        },
       ),
       lesson_id: lessonID,
     };

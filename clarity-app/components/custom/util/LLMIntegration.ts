@@ -9,7 +9,7 @@ const openai = new OpenAI({
 export default async function PromptModel(
   model_instructions: string,
   message: string,
-  model: string = "xiaomi/mimo-v2-flash:free"
+  model: string = "xiaomi/mimo-v2-flash:free",
 ) {
   const completion = await openai.chat.completions.create({
     model: model,

@@ -846,7 +846,7 @@ export default async function Dashboard() {
         lessons.push(lesson);
       }
       profile.current_lesson_ids = lessons.map(
-        (lesson: Lesson) => lesson.lesson_id
+        (lesson: Lesson) => lesson.lesson_id,
       );
       await updateRowInTable(`${user.user_id}`, profile, "profiles");
     } else if (!lessons || lessons.length < profile.interest_areas.length) {
@@ -857,10 +857,10 @@ export default async function Dashboard() {
         .filter((lesson: Lesson) => lesson.status != "completed")
         .map((lesson: Lesson) => lesson.lesson_id);
       console.log(
-        `Profile lesson ids after removing completed one: ${profile.current_lesson_ids}`
+        `Profile lesson ids after removing completed one: ${profile.current_lesson_ids}`,
       );
       console.log(
-        `Profile lesson ids length: ${profile.current_lesson_ids.length}`
+        `Profile lesson ids length: ${profile.current_lesson_ids.length}`,
       );
       lessons = await GetLessons(profile.user_id, profile.current_lesson_ids);
       if (profile.current_lesson_ids.length < 2) {
@@ -912,7 +912,10 @@ export default async function Dashboard() {
             </section>
           </div>
           <section className="flex-2">
-            <ImprovementAreaSection maxDisplayableLessons={3} />
+            <ImprovementAreaSection
+              maxDisplayableLessons={3}
+              profile={profile}
+            />
           </section>
         </section>
         <section className="flex-1 lg:grid lg:grid-cols-2 max-lg:flex max-lg:flex-col gap-3 mb-10 max-w-4/5 w-4/5 m-auto">
