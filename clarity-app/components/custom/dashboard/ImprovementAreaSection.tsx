@@ -19,49 +19,6 @@ export type ImprovementArea = {
   category: "theory" | "practice" | "creativity";
 };
 
-const improvementAreas: ImprovementArea[] = [
-  {
-    subject: "English",
-    title: "Practice Past Tenses",
-    category: "theory",
-    suggestedImprovements: ["irregular verbs", "subject-verb agreement"],
-  },
-  {
-    subject: "Math",
-    title: "Review Sign Rules",
-    category: "practice",
-    suggestedImprovements: ["sign multiplication"],
-  },
-  {
-    subject: "Math",
-    title: "Retry Sine Operations",
-    category: "practice",
-    suggestedImprovements: [
-      "recalling sine formula",
-      "distinguishing sine from cosine",
-      "identifying sines correctly",
-    ],
-  },
-  {
-    subject: "English",
-    title: "Review Plot Characteristics",
-    category: "creativity",
-    suggestedImprovements: [
-      "reviewing timeline of a plot",
-      "analyzing a plot's theme",
-      "discovering an author's intention",
-      "unveiling the plot's message",
-    ],
-  },
-  {
-    subject: "English",
-    title: "Analyzing drama",
-    category: "creativity",
-    suggestedImprovements: ["reviewing imagery", "crafting your own drama"],
-  },
-];
-
-// const improvementAreas: ImprovementArea[] = [];
 export default function ImprovementAreaSection({
   maxDisplayableLessons,
   profile,
@@ -117,7 +74,6 @@ export default function ImprovementAreaSection({
                 updatedProfile,
                 "profiles",
               ).then(() => {
-                console.log("Hello");
                 router.push(`lessons/${lesson.lesson_id}`);
               });
             });
@@ -132,24 +88,26 @@ export default function ImprovementAreaSection({
         Work in your areas of improvement
       </h2>
       <div className="flex flex-col">
-        {profile.opportunity_areas.map((opportunity_area, i) => {
-          if (i == maxDisplayableLessons)
-            return (
-              <Button variant="ghost" key={i} className="flex w-fit">
-                <p>View All</p>
-                <ChevronRight />
-              </Button>
-            );
-          if (i < maxDisplayableLessons) {
-            return (
-              <ImprovementAreaCard
-                gotoLesson={gotoLesson}
-                key={i}
-                data={opportunity_area}
-              />
-            );
-          }
-        })}
+        {profile.opportunity_areas
+          .filter((opportunity_area) => !opportunity_area.completed)
+          .map((opportunity_area, i) => {
+            if (i == maxDisplayableLessons)
+              return (
+                <Button variant="ghost" key={i} className="flex w-fit">
+                  <p>View All</p>
+                  <ChevronRight />
+                </Button>
+              );
+            if (i < maxDisplayableLessons) {
+              return (
+                <ImprovementAreaCard
+                  gotoLesson={gotoLesson}
+                  key={i}
+                  data={opportunity_area}
+                />
+              );
+            }
+          })}
       </div>
     </Card>
   );

@@ -83,7 +83,33 @@ export default function LessonContent({
           onCompletedCallbackAction={(
             results: { section: string; status: "correct" | "incorrect" }[],
           ) => {
-            if (lesson.topic == null) {
+            if (lesson.category === "improvement") {
+              const updatedProfile = { ...profile };
+              updatedProfile.opportunity_areas[
+                profile.opportunity_areas.findIndex(
+                  (area) => area.lesson_id === lesson.lesson_id,
+                )
+              ].completed = true;
+              GenerateOpportunityAreas(profile, results, lesson.subject).then(
+                (data) => {
+                  if (updatedProfile.opportunity_areas.length > 0) {
+                    updatedProfile.opportunity_areas = [
+                      ...updatedProfile.opportunity_areas,
+                      ...data.opportunity_areas,
+                    ];
+                  } else {
+                    updatedProfile.opportunity_areas = data.opportunity_areas;
+                  }
+                  updateRowInTable(
+                    profile.user_id,
+                    updatedProfile,
+                    "profiles",
+                  ).then(() => {
+                    router.replace("/dashboard");
+                  });
+                },
+              );
+            } else if (lesson.topic == null) {
               setIsGenerating(true);
               console.log(results);
               GenerateRoadmap(profile, lesson.subject, results).then(() => {
@@ -102,7 +128,6 @@ export default function LessonContent({
                     console.log(profileUpdated);
                   } else {
                     profileUpdated.opportunity_areas = data.opportunity_areas;
-                    console.log(profileUpdated);
                   }
                   profileUpdated.current_lesson_ids =
                     profileUpdated.current_lesson_ids?.filter((lesson_id) => {

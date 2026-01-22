@@ -21,6 +21,7 @@ export type Profile = {
   opportunity_areas: {
     subject: string;
     area: string;
+    completed: boolean;
     suggestedExercisesTopic: string;
     improvementRequirements: string;
     lesson_id: string;

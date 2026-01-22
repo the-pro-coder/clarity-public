@@ -229,6 +229,7 @@ Do NOT add, remove, reorder, or rename sections.
 Each item must follow the correct shape.
 AVOID COMPLETELY adding opportunity areas similar or equal in topic to those existing already in the user profile. 
 Generate one opportunity area for each wrong answer.
+Titles and descriptions should be short and clear for the user, but complete at the same time.
 
 Input lesson results (JSON):
 ${JSON.stringify(lessonResults)}
