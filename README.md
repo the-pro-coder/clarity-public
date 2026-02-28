@@ -39,7 +39,7 @@ The platform prioritizes:
 
 ## Software Architecture
 
-![image.png](https://ibb.co/8gDLH2Lp)
+![image.png](https://i.ibb.co/PGZvd4vn/image-4.png)
 
 ![image.png](image%201.png)
 
