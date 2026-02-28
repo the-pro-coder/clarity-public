@@ -96,6 +96,7 @@ The system dynamically optimizes token usage to balance performance and cost.
 
 ## Project Structure
 
+<pre>
 clarity-app/
 │
 ├── app/ # Next.js App Router layer
@@ -138,6 +139,7 @@ clarity-app/
 ├── globals.css
 ├── layout.tsx
 └── configuration files...
+</pre>
 
 The codebase is structured for scalability, separating:
 
