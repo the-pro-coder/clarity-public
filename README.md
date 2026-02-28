@@ -2,13 +2,13 @@
 
 An intelligent web application designed to make learning structured, focused, and accessible — especially for students who struggle with ADHD and benefit from chunked, visual, and adaptive instruction.
 
-[Next.js](https://img.shields.io/badge/Next.js-15-black)
+![Next.js](https://img.shields.io/badge/Next.js-15-black)
 
-[Supabase](https://img.shields.io/badge/Supabase-Backend-green)
+![Supabase](https://img.shields.io/badge/Supabase-Backend-green)
 
-[OpenAI](https://img.shields.io/badge/LLM-Integrated-blue)
+![OpenAI](https://img.shields.io/badge/LLM-Integrated-blue)
 
-[Status](https://img.shields.io/badge/Status-Active_Development-orange)
+![Status](https://img.shields.io/badge/Status-Active_Development-orange)
 
 ## What is Clarity?
 
@@ -41,7 +41,7 @@ The platform prioritizes:
 
 ![image.png](https://i.ibb.co/PGZvd4vn/image-4.png)
 
-![image.png](image%201.png)
+![image.png](https://i.ibb.co/mCDYnwdp/image-5.png)
 
 ### Architecture Overview
 
